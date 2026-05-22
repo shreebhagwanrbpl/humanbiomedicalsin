@@ -5,8 +5,8 @@ import { PageHero } from "@/components/SectionHeader";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Use | Rajbiosis Pvt Ltd" },
-      { name: "description", content: "Terms and conditions for using the Rajbiosis Pvt Ltd website and services." },
+      { title: "Terms of Use | Human Biomedicals Pvt Ltd" },
+      { name: "description", content: "Terms and conditions for using the Human Biomedicals Pvt Ltd website and services." },
     ],
   }),
   component: TermsPage,
@@ -23,7 +23,7 @@ function TermsPage() {
             { t: "2. Product Information", d: "Specifications, images and pricing are indicative and subject to change without notice. Final terms are confirmed on quotation." },
             { t: "3. Orders & Payment", d: "All orders are subject to acceptance. Payment terms are agreed in writing per quotation. Taxes are extra as applicable." },
             { t: "4. Warranty", d: "Equipment carries the manufacturer's warranty. Reagents and consumables are guaranteed within stated shelf life when stored as instructed." },
-            { t: "5. Limitation of Liability", d: "Rajbiosis is not liable for indirect, incidental or consequential damages arising from use of products or services." },
+            { t: "5. Limitation of Liability", d: "Human Biomedicals is not liable for indirect, incidental or consequential damages arising from use of products or services." },
             { t: "6. Governing Law", d: "These terms are governed by the laws of India. Disputes are subject to the exclusive jurisdiction of New Delhi courts." },
           ].map((s) => (
             <div key={s.t}>

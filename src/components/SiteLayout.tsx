@@ -1,14 +1,34 @@
 import { Navbar } from "./Navbar";
+
 import { Footer } from "./Footer";
+
 // import { WhatsAppFab } from "./WhatsAppFab";
 
-export function SiteLayout({ children }: { children: React.ReactNode }) {
+interface SiteLayoutProps {
+  children: React.ReactNode;
+  district?: string;
+}
+
+export function SiteLayout({
+  children,
+  district,
+}: SiteLayoutProps) {
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1">{children}</main>
+
+      <Navbar district={district} />
+
+      <main className="flex-1">
+
+        {children}
+
+      </main>
+
       <Footer />
+
       {/* <WhatsAppFab /> */}
+
     </div>
   );
 }

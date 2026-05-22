@@ -13,13 +13,21 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as QuoteRouteImport } from './routes/quote'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ItemsRouteImport } from './routes/items'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as DistrictIndexRouteImport } from './routes/$district/index'
 import { Route as ProductsProductRouteImport } from './routes/products.$product'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as DistrictServicesRouteImport } from './routes/$district/services'
+import { Route as DistrictQuoteRouteImport } from './routes/$district/quote'
+import { Route as DistrictItemsRouteImport } from './routes/$district/items'
+import { Route as DistrictContactRouteImport } from './routes/$district/contact'
+import { Route as DistrictBlogRouteImport } from './routes/$district/blog'
+import { Route as DistrictAboutRouteImport } from './routes/$district/about'
 import { Route as ProductsCategoryCategoryRouteImport } from './routes/products.category.$category'
 
 const TermsRoute = TermsRouteImport.update({
@@ -40,6 +48,11 @@ const QuoteRoute = QuoteRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItemsRoute = ItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -67,6 +80,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DistrictIndexRoute = DistrictIndexRouteImport.update({
+  id: '/$district/',
+  path: '/$district/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsProductRoute = ProductsProductRouteImport.update({
   id: '/products/$product',
   path: '/products/$product',
@@ -75,6 +93,36 @@ const ProductsProductRoute = ProductsProductRouteImport.update({
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistrictServicesRoute = DistrictServicesRouteImport.update({
+  id: '/$district/services',
+  path: '/$district/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistrictQuoteRoute = DistrictQuoteRouteImport.update({
+  id: '/$district/quote',
+  path: '/$district/quote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistrictItemsRoute = DistrictItemsRouteImport.update({
+  id: '/$district/items',
+  path: '/$district/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistrictContactRoute = DistrictContactRouteImport.update({
+  id: '/$district/contact',
+  path: '/$district/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistrictBlogRoute = DistrictBlogRouteImport.update({
+  id: '/$district/blog',
+  path: '/$district/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistrictAboutRoute = DistrictAboutRouteImport.update({
+  id: '/$district/about',
+  path: '/$district/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsCategoryCategoryRoute =
@@ -88,12 +136,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/items': typeof ItemsRoute
   '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/$district/about': typeof DistrictAboutRoute
+  '/$district/blog': typeof DistrictBlogRoute
+  '/$district/contact': typeof DistrictContactRoute
+  '/$district/items': typeof DistrictItemsRoute
+  '/$district/quote': typeof DistrictQuoteRoute
+  '/$district/services': typeof DistrictServicesRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/products/$product': typeof ProductsProductRoute
+  '/$district/': typeof DistrictIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/products/category/$category': typeof ProductsCategoryCategoryRoute
@@ -102,12 +158,20 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/items': typeof ItemsRoute
   '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/$district/about': typeof DistrictAboutRoute
+  '/$district/blog': typeof DistrictBlogRoute
+  '/$district/contact': typeof DistrictContactRoute
+  '/$district/items': typeof DistrictItemsRoute
+  '/$district/quote': typeof DistrictQuoteRoute
+  '/$district/services': typeof DistrictServicesRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/products/$product': typeof ProductsProductRoute
+  '/$district': typeof DistrictIndexRoute
   '/blog': typeof BlogIndexRoute
   '/products': typeof ProductsIndexRoute
   '/products/category/$category': typeof ProductsCategoryCategoryRoute
@@ -117,12 +181,20 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/items': typeof ItemsRoute
   '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/$district/about': typeof DistrictAboutRoute
+  '/$district/blog': typeof DistrictBlogRoute
+  '/$district/contact': typeof DistrictContactRoute
+  '/$district/items': typeof DistrictItemsRoute
+  '/$district/quote': typeof DistrictQuoteRoute
+  '/$district/services': typeof DistrictServicesRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/products/$product': typeof ProductsProductRoute
+  '/$district/': typeof DistrictIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/products/category/$category': typeof ProductsCategoryCategoryRoute
@@ -133,12 +205,20 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/items'
     | '/privacy'
     | '/quote'
     | '/services'
     | '/terms'
+    | '/$district/about'
+    | '/$district/blog'
+    | '/$district/contact'
+    | '/$district/items'
+    | '/$district/quote'
+    | '/$district/services'
     | '/blog/$slug'
     | '/products/$product'
+    | '/$district/'
     | '/blog/'
     | '/products/'
     | '/products/category/$category'
@@ -147,12 +227,20 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/items'
     | '/privacy'
     | '/quote'
     | '/services'
     | '/terms'
+    | '/$district/about'
+    | '/$district/blog'
+    | '/$district/contact'
+    | '/$district/items'
+    | '/$district/quote'
+    | '/$district/services'
     | '/blog/$slug'
     | '/products/$product'
+    | '/$district'
     | '/blog'
     | '/products'
     | '/products/category/$category'
@@ -161,12 +249,20 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/items'
     | '/privacy'
     | '/quote'
     | '/services'
     | '/terms'
+    | '/$district/about'
+    | '/$district/blog'
+    | '/$district/contact'
+    | '/$district/items'
+    | '/$district/quote'
+    | '/$district/services'
     | '/blog/$slug'
     | '/products/$product'
+    | '/$district/'
     | '/blog/'
     | '/products/'
     | '/products/category/$category'
@@ -176,12 +272,20 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  ItemsRoute: typeof ItemsRoute
   PrivacyRoute: typeof PrivacyRoute
   QuoteRoute: typeof QuoteRoute
   ServicesRoute: typeof ServicesRoute
   TermsRoute: typeof TermsRoute
+  DistrictAboutRoute: typeof DistrictAboutRoute
+  DistrictBlogRoute: typeof DistrictBlogRoute
+  DistrictContactRoute: typeof DistrictContactRoute
+  DistrictItemsRoute: typeof DistrictItemsRoute
+  DistrictQuoteRoute: typeof DistrictQuoteRoute
+  DistrictServicesRoute: typeof DistrictServicesRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ProductsProductRoute: typeof ProductsProductRoute
+  DistrictIndexRoute: typeof DistrictIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   ProductsCategoryCategoryRoute: typeof ProductsCategoryCategoryRoute
@@ -215,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/items': {
+      id: '/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof ItemsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -252,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$district/': {
+      id: '/$district/'
+      path: '/$district'
+      fullPath: '/$district/'
+      preLoaderRoute: typeof DistrictIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products/$product': {
       id: '/products/$product'
       path: '/products/$product'
@@ -264,6 +382,48 @@ declare module '@tanstack/react-router' {
       path: '/blog/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$district/services': {
+      id: '/$district/services'
+      path: '/$district/services'
+      fullPath: '/$district/services'
+      preLoaderRoute: typeof DistrictServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$district/quote': {
+      id: '/$district/quote'
+      path: '/$district/quote'
+      fullPath: '/$district/quote'
+      preLoaderRoute: typeof DistrictQuoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$district/items': {
+      id: '/$district/items'
+      path: '/$district/items'
+      fullPath: '/$district/items'
+      preLoaderRoute: typeof DistrictItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$district/contact': {
+      id: '/$district/contact'
+      path: '/$district/contact'
+      fullPath: '/$district/contact'
+      preLoaderRoute: typeof DistrictContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$district/blog': {
+      id: '/$district/blog'
+      path: '/$district/blog'
+      fullPath: '/$district/blog'
+      preLoaderRoute: typeof DistrictBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$district/about': {
+      id: '/$district/about'
+      path: '/$district/about'
+      fullPath: '/$district/about'
+      preLoaderRoute: typeof DistrictAboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products/category/$category': {
@@ -280,12 +440,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  ItemsRoute: ItemsRoute,
   PrivacyRoute: PrivacyRoute,
   QuoteRoute: QuoteRoute,
   ServicesRoute: ServicesRoute,
   TermsRoute: TermsRoute,
+  DistrictAboutRoute: DistrictAboutRoute,
+  DistrictBlogRoute: DistrictBlogRoute,
+  DistrictContactRoute: DistrictContactRoute,
+  DistrictItemsRoute: DistrictItemsRoute,
+  DistrictQuoteRoute: DistrictQuoteRoute,
+  DistrictServicesRoute: DistrictServicesRoute,
   BlogSlugRoute: BlogSlugRoute,
   ProductsProductRoute: ProductsProductRoute,
+  DistrictIndexRoute: DistrictIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   ProductsCategoryCategoryRoute: ProductsCategoryCategoryRoute,

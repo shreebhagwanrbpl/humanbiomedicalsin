@@ -13,11 +13,11 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.post.title} | Rajbiosis Blog` },
-          { name: "description", content: loaderData.post.excerpt },
-          { property: "og:title", content: loaderData.post.title },
-          { property: "og:description", content: loaderData.post.excerpt },
-        ]
+        { title: `${loaderData.post.title} | Human Biomedicals Blog` },
+        { name: "description", content: loaderData.post.excerpt },
+        { property: "og:title", content: loaderData.post.title },
+        { property: "og:description", content: loaderData.post.excerpt },
+      ]
       : [],
   }),
   notFoundComponent: () => (

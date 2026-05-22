@@ -5,8 +5,8 @@ import { PageHero } from "@/components/SectionHeader";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy | Rajbiosis Pvt Ltd" },
-      { name: "description", content: "Read how Rajbiosis Pvt Ltd collects, uses and protects your personal information." },
+      { title: "Privacy Policy | Human Biomedicals Pvt Ltd" },
+      { name: "description", content: "Read how Human Biomedicals Pvt Ltd collects, uses and protects your personal information." },
     ],
   }),
   component: PrivacyPage,
@@ -36,7 +36,7 @@ function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-xl font-bold mb-2">5. Contact</h2>
-            <p className="text-muted-foreground">For any privacy-related questions, write to info@rajbiosis.com.</p>
+            <p className="text-muted-foreground">For any privacy-related questions, write to info@humanbiomedicals.com.</p>
           </div>
         </div>
       </section>
