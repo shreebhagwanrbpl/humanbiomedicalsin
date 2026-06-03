@@ -5,8 +5,8 @@ import { PageHero } from "@/components/SectionHeader";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Use | Human Biomedicals Pvt Ltd" },
-      { name: "description", content: "Terms and conditions for using the Human Biomedicals Pvt Ltd website and services." },
+      { title: "Terms of Use | Human Biomedical LLP" },
+      { name: "description", content: "Terms and conditions for using the Human Biomedical LLP website and services." },
     ],
   }),
   component: TermsPage,

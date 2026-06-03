@@ -88,7 +88,11 @@ const schema = z.object({
       .max(1000),
 });
 
-export function QuoteForm() {
+export function QuoteForm({
+  defaultProduct = "",
+}: {
+  defaultProduct?: string;
+}) {
 
   const categories = [
     {
@@ -134,106 +138,99 @@ export function QuoteForm() {
 
   const [submitting, setSubmitting] =
     useState(false);
-
+  const [selectedProduct, setSelectedProduct] =
+    useState(defaultProduct);
   const [category, setCategory] =
     useState("");
 
   const [errors, setErrors] =
     useState<Record<string, string>>({});
 
-  const onSubmit =
-    async (
-      e: React.FormEvent<HTMLFormElement>
-    ) => {
+  const onSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
 
-      e.preventDefault();
+    if (submitting) return;
 
-      const form =
-        new FormData(
-          e.currentTarget
-        );
+    const formElement = e.currentTarget;
 
-      const data = {
-        ...Object.fromEntries(form),
-        category,
-      };
+    const form = new FormData(formElement);
 
-      const parsed =
-        schema.safeParse(data);
+    const data = {
+      ...Object.fromEntries(form),
+      category,
+    };
 
-      if (!parsed.success) {
+    const parsed = schema.safeParse(data);
 
-        const errs:
-          Record<string, string> = {};
+    if (!parsed.success) {
+      const errs: Record<string, string> = {};
 
-        parsed.error.issues.forEach(
-          (i) => {
+      parsed.error.issues.forEach((i) => {
+        errs[i.path[0] as string] = i.message;
+      });
 
-            errs[
-              i.path[0] as string
-            ] = i.message;
+      setErrors(errs);
 
-          }
-        );
+      toast.error(
+        "Please fill all required fields correctly"
+      );
 
-        setErrors(errs);
+      return;
+    }
 
-        toast.error(
-          "Please fill all required fields correctly"
-        );
+    setErrors({});
+    setSubmitting(true);
 
-        return;
+    try {
+      console.log("Submitting enquiry...");
 
-      }
+      const docRef = await addDoc(
+        collection(
+          db,
+          "websitesQueries",
+          "humanbiomedicalsin",
+          "productQueries"
+        ),
+        {
+          ...parsed.data,
+          productName:
+            parsed.data.product ||
+            "General Enquiry",
+          createdAt: serverTimestamp(),
+        }
+      );
 
+      console.log(
+        "Enquiry saved successfully:",
+        docRef.id
+      );
+
+      toast.success(
+        "Enquiry Submitted Successfully "
+      );
+
+      formElement.reset();
+
+      setCategory("");
+      setSelectedProduct("");
       setErrors({});
 
-      setSubmitting(true);
+      return;
+    } catch (error) {
+      console.error(
+        "Firestore submit error:",
+        error
+      );
 
-      try {
-
-        await addDoc(
-          collection(
-            db,
-            "websitesQueries",
-            "humanbiomedicalsin",
-            "productQueries"
-          ),
-          {
-            ...parsed.data,
-
-            createdAt:
-              serverTimestamp(),
-          }
-        );
-
-        toast.success(
-          "Quote request submitted successfully!",
-          {
-            duration: 3000,
-          }
-        );
-
-        e.currentTarget.reset();
-
-        setCategory("");
-
-      } catch (err) {
-
-        console.log(err);
-
-        toast.error(
-          "Failed to submit enquiry. Please try again later.",
-          {
-            duration: 4000,
-          }
-        );
-
-      }
-
+      toast.error(
+        "Failed to submit enquiry "
+      );
+    } finally {
       setSubmitting(false);
-
-    };
+    }
+  };
 
   return (
 
@@ -324,14 +321,29 @@ export function QuoteForm() {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="product">
+              Product (optional)
+            </Label>
+
+            <Input
+              id="product"
+              name="product"
+              value={selectedProduct}
+              onChange={(e) =>
+                setSelectedProduct(e.target.value)
+              }
+            />
+
+            {errors.product && (
+              <p className="text-xs text-destructive mt-1">
+                {errors.product}
+              </p>
+            )}
+          </div>
 
           <Field
-            label="Product (optional)"
-            name="product"
-            error={errors.product}
-          />
 
-          <Field
             label="Quantity (optional)"
             name="quantity"
             error={errors.quantity}
@@ -402,14 +414,13 @@ function Field({
   name,
   type = "text",
   error,
+  defaultValue,
 }: {
   label: string;
-
   name: string;
-
   type?: string;
-
   error?: string;
+  defaultValue?: string;
 }) {
 
   return (
@@ -426,6 +437,7 @@ function Field({
         id={name}
         name={name}
         type={type}
+        defaultValue={defaultValue}
       />
 
       {error && (

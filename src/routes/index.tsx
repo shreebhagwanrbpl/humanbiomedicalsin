@@ -10,7 +10,6 @@ import {
   Calendar,
   Star,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
@@ -79,8 +78,7 @@ export const Route = createFileRoute("/")({
     meta: [
       {
         title:
-          loaderData?.title ||
-          "Human Biomedicals Pvt Ltd — Medical Lab Equipment, Reagents & Diagnostics",
+          "Human Biomedical LLP — Medical Lab Equipment, Reagents & Diagnostics",
       },
 
       {
@@ -96,7 +94,7 @@ export const Route = createFileRoute("/")({
 
         content:
           loaderData?.title ||
-          "Human Biomedicals Pvt Ltd — Precision Diagnostics",
+          "Human Biomedical LLP — Precision Diagnostics",
       },
 
       {
@@ -119,9 +117,18 @@ export const Route = createFileRoute("/")({
     ],
   }),
 
-  component: HomePage,
-});
+  component: IndexPage,
 
+});
+function IndexPage() {
+  const data = Route.useLoaderData();
+
+  return (
+    <HomePage
+      data={data}
+    />
+  );
+}
 const stats = [
   { icon: Users, value: "1,200+", label: "Happy Clients" },
 
@@ -195,6 +202,32 @@ const testimonials = [
   },
 ];
 
+// function HomePage({
+//   district,
+//   city,
+//   data,
+// }: {
+//   district?: string;
+//   city?: string;
+//   data?: any;
+// }) {
+
+//   const routeData =
+//     data || {};
+//   // const routeData: any =
+//   //   Route.useLoaderData();
+
+//   const categories =
+//     routeData?.categories || [];
+
+//   const featured = getFeatured(
+//     routeData?.products || []
+//   );
+//   const prefix =
+//     district &&
+//       district !== "undefined"
+//       ? `/${district}`
+//       : "";
 function HomePage({
   district,
   city,
@@ -208,15 +241,17 @@ function HomePage({
   const routeData =
     data || {};
 
-  const categories =
-    routeData?.categories || [];
-
   const featured = getFeatured(
     routeData?.products || []
   );
 
+  const prefix =
+    district &&
+      district !== ""
+      ? `/${district}`
+      : "";
   return (
-    <SiteLayout district={district}>
+    <SiteLayout>
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-hero">
@@ -235,21 +270,13 @@ function HomePage({
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05] mb-5">
 
-              {routeData?.title || (
-                <>
-                  Precision Diagnostics.
-                  <span className="text-gradient">
-                    Trusted Worldwide.
-                  </span>
-                </>
-              )}
+              {routeData?.title}
 
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8 max-w-xl leading-relaxed">
 
-              {routeData?.description ||
-                "Human Biomedicals delivers premium hematology & biochemistry analyzers, reagents and consumables to clinical laboratories across India."}
+              {routeData?.description}
 
             </p>
 
@@ -260,25 +287,25 @@ function HomePage({
                 size="lg"
                 className="bg-gradient-primary shadow-soft hover:shadow-glow transition-smooth"
               >
+                <a href={`${prefix}/contact`}>
 
-                <Link to={routeData?.button1Link || "/quote"}>
-
-                  {routeData?.button1Text || "Get Quote"}
+                  {routeData?.button1Text}
 
                   <ArrowRight className="ml-1 h-4 w-4" />
 
-                </Link>
-
+                </a>
               </Button>
 
-              <Button asChild size="lg" variant="outline">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+              >
+                <a href={`${prefix}/items`}>
 
-                <Link to={routeData?.button2Link || "/products"}>
+                  {routeData?.button2Text}
 
-                  {routeData?.button2Text || "Explore Products"}
-
-                </Link>
-
+                </a>
               </Button>
 
             </div>
@@ -334,19 +361,23 @@ function HomePage({
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-          {categories.map((c: any) => (
-            <Link
-              key={c.slug}
-              to="/products/category/$category"
-              params={{ category: c.slug }}
+          {/* {categories.map((c: any) => ( */}
+          {featured.map((p: any) => (
+
+            <a
+              href={`${prefix}/products/${p.title
+                .toLowerCase()
+                .replace(/\s+/g, "-")
+                .replace(/[^\w-]/g, "")
+                }`}
               className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-soft hover:shadow-elegant hover:-translate-y-1 transition-smooth"
             >
 
               <div className="aspect-[4/3] overflow-hidden bg-muted">
 
                 <img
-                  src={c.image}
-                  alt={c.name}
+                  src={p.image}
+                  alt={p.name}
                   loading="lazy"
                   className="h-full w-full object-cover group-hover:scale-105 transition-smooth"
                 />
@@ -356,16 +387,22 @@ function HomePage({
               <div className="p-5">
 
                 <h3 className="font-semibold mb-1">
-                  {c.name}
+                  Product: {p.title}
                 </h3>
 
                 <p className="text-sm text-muted-foreground">
-                  {c.tagline}
+                  Brand: {p.brand}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Model: {p.model}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Parameters: {p.parameters}
                 </p>
 
               </div>
 
-            </Link>
+            </a>
           ))}
 
         </div>
@@ -385,7 +422,11 @@ function HomePage({
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             {featured.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard
+                key={p.id}
+                product={p}
+                district={district}
+              />
             ))}
 
           </div>
@@ -393,11 +434,9 @@ function HomePage({
           <div className="text-center mt-10">
 
             <Button asChild variant="outline" size="lg">
-
-              <Link to="/products">
+              <a href={`${prefix}/items`}>
                 View All Products
-              </Link>
-
+              </a>
             </Button>
 
           </div>
@@ -538,12 +577,16 @@ function HomePage({
             className="relative"
           >
 
-            <Link to="/quote">
-
+            <Link
+              to={district ? "/$district/quote" : "/quote"}
+              params={
+                district
+                  ? { district }
+                  : undefined
+              }
+            >
               Request Quotation
-
               <ArrowRight className="ml-1 h-4 w-4" />
-
             </Link>
 
           </Button>

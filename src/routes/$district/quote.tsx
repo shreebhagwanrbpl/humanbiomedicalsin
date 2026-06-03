@@ -17,13 +17,21 @@ export const Route =
         "/$district/quote"
     )({
 
+        validateSearch: (
+            search: Record<string, unknown>
+        ) => ({
+            product:
+                typeof search.product === "string"
+                    ? search.product
+                    : "",
+        }),
+
         beforeLoad: async ({
             params,
         }) => {
 
             const slug =
-                params.district
-                    ?.toLowerCase();
+                params.district?.toLowerCase();
 
             const snap =
                 await getDoc(
@@ -36,9 +44,7 @@ export const Route =
                     )
                 );
 
-            if (
-                !snap.exists()
-            ) {
+            if (!snap.exists()) {
 
                 throw notFound();
 
@@ -56,10 +62,15 @@ function DistrictQuotePage() {
     const { district } =
         Route.useParams();
 
+    const { product } =
+        Route.useSearch();
+
     return (
         <QuotePage
             district={district}
-            city={district}
+            product={product}
         />
     );
 }
+
+export default DistrictQuotePage;

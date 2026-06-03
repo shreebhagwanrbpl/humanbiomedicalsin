@@ -4,19 +4,76 @@ import { ArrowRight } from "lucide-react";
 
 import type { Product } from "@/data/products";
 
+// export function ProductCard({
+//   product,
+//   district,
+// }: {
+//   product: Product;
+//   district?: string;
+// }) {
 export function ProductCard({
   product,
+  district,
+  detailLink = false,
 }: {
   product: Product;
+  district?: string;
+  detailLink?: boolean;
 }) {
-
+  console.log("PRODUCT DATA", product);
+  console.log("TITLE", product.title);
+  // console.log("SLUG", product.slug);
+  console.log("ID", product.id);
   return (
-    <Link
-      to="/products/$product"
+    // <Link
+    //   to={
+    //     district
+    //       ? "/$district/items"
+    //       : "/items"
+    //   }
 
-      params={{
-        product: product.id,
-      }}
+    //   params={
+    //     district
+    //       ? {
+    //         district,
+    //         product: product.id,
+    //       }
+    //       : {
+    //         product: product.id,
+    //       }
+    //   }
+    <Link
+      to={
+        detailLink
+          ? district
+            ? "/$district/products/$product"
+            : "/products/$product"
+          : district
+            ? "/$district/items"
+            : "/items"
+      }
+      params={
+        detailLink
+          ? district
+            ? {
+              district,
+              product: product.title
+                .toLowerCase()
+                .replace(/\s+/g, "-")
+                .replace(/[^\w-]/g, ""),
+            }
+            : {
+              product: product.title
+                .toLowerCase()
+                .replace(/\s+/g, "-")
+                .replace(/[^\w-]/g, ""),
+            }
+          : district
+            ? {
+              district,
+            }
+            : {}
+      }
 
       className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden shadow-soft hover:shadow-elegant hover:-translate-y-1 transition-smooth"
     >
@@ -42,16 +99,17 @@ export function ProductCard({
 
         <h3 className="font-semibold text-base leading-snug mb-2 line-clamp-2">
 
-          {product.title}
+          Product: {product.title}
 
         </h3>
 
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
 
-          typeof product.desc === "object"
-          ? product.desc.text || product.desc.richText
-          : product.desc
+          Brand: {product.brand}
+        </p>
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
 
+          Model: {product.model}
         </p>
 
         <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary group-hover:gap-2.5 transition-smooth">

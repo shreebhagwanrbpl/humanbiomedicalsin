@@ -31,11 +31,18 @@ export const Route = createFileRoute("/products/$product")({
         (p: any) => p.isPublished
       );
 
-    const product = getProduct(
-      publishedProducts,
-      params.product
-    );
-
+    // const product = getProduct(
+    //   publishedProducts,
+    //   params.product
+    // );
+    const product =
+      publishedProducts.find(
+        (p: any) =>
+          p.title
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^\w-]/g, "") === params.product
+      );
     if (!product) throw notFound();
 
     return {
@@ -141,7 +148,11 @@ export const Route = createFileRoute("/products/$product")({
   component: ProductDetail,
 });
 
-function ProductDetail() {
+function ProductDetail({
+  district,
+}: {
+  district?: string;
+}) {
 
   const {
     product,
@@ -269,7 +280,7 @@ function ProductDetail() {
 
             </h2>
 
-            <ul className="space-y-2 mb-8">
+            {/* <ul className="space-y-2 mb-8">
 
               {[
                 product.capacity,
@@ -297,24 +308,81 @@ function ProductDetail() {
                   </li>
                 ))}
 
-            </ul>
+            </ul> */}
+            <div className="rounded-2xl border border-border overflow-hidden">
 
-            <div className="flex flex-wrap gap-3">
+              <table className="w-full text-sm">
+
+                <tbody>
+
+                  {[
+                    // ["Price", product.price],
+                    ["Capacity", product.capacity],
+                    ["Throughput", product.throughput],
+                    ["Instrument", product.instrument],
+                    ["Model", product.model],
+                    ["Usage", product.usage],
+                    ["Brand", product.brand],
+                    ["Parameters", product.parameters],
+                    ["Automation", product.automation],
+                    ["Availability", product.availability],
+                    ["Size", product.size],
+                  ]
+                    .filter((s) => s[1])
+                    .map((s, i) => (
+                      <tr
+                        key={s[0]}
+                        className={
+                          i % 2 === 0
+                            ? "bg-muted/40"
+                            : "bg-card"
+                        }
+                      >
+
+                        <td className="px-5 py-4 font-medium w-1/3">
+
+                          {s[0]}
+
+                        </td>
+
+                        <td className="px-5 py-4 text-muted-foreground">
+
+                          {s[1]}
+
+                        </td>
+
+                      </tr>
+                    ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+            <div className="flex flex-wrap gap-3 pt-5">
 
               <Button
                 asChild
                 size="lg"
                 className="bg-gradient-primary shadow-soft"
               >
-
-                <Link to="/quote">
-
+                <Link
+                  to={
+                    district
+                      ? "/$district/quote"
+                      : "/quote"
+                  }
+                  params={
+                    district
+                      ? { district }
+                      : undefined
+                  }
+                  search={{
+                    product: product.title,
+                  }}
+                >
                   Enquire Now
-
-                  <ArrowRight className="ml-1 h-4 w-4" />
-
                 </Link>
-
               </Button>
 
               <Button
@@ -338,7 +406,7 @@ function ProductDetail() {
       </section>
 
       {/* SPECS */}
-      <section className="container mx-auto px-4 md:px-6 py-12">
+      {/* <section className="container mx-auto px-4 md:px-6 py-12">
 
         <h2 className="text-2xl font-bold mb-6">
 
@@ -397,7 +465,7 @@ function ProductDetail() {
 
         </div>
 
-      </section>
+      </section> */}
 
       {/* RELATED */}
       {related.length > 0 && (
@@ -414,6 +482,7 @@ function ProductDetail() {
               <ProductCard
                 key={p.id}
                 product={p}
+                district={district}
               />
             ))}
 

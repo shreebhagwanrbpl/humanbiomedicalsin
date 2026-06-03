@@ -123,7 +123,11 @@ export const Route = createFileRoute("/products/category/$category")({
   component: CategoryPage,
 });
 
-function CategoryPage() {
+function CategoryPage({
+  district,
+}: {
+  district?: string;
+}) {
 
   const {
     category,
@@ -160,6 +164,7 @@ function CategoryPage() {
               <ProductCard
                 key={p.id}
                 product={p}
+                district={district}
               />
 
             ))}

@@ -61,7 +61,7 @@
 //             "description",
 
 //           content:
-//             "Get in touch with Human Biomedicals Pvt Ltd. Sales, support and AMC enquiries — phone, email, WhatsApp and office address.",
+//             "Get in touch with Human Biomedical LLP. Sales, support and AMC enquiries — phone, email, WhatsApp and office address.",
 //         },
 
 //         {

@@ -30,14 +30,14 @@ export const Route =
           name: "description",
 
           content:
-            "Human Biomedicals Pvt Ltd is an ISO 13485 certified supplier of medical lab equipment, reagents and consumables since 2008.",
+            "Human Biomedical LLP is an ISO 13485 certified supplier of medical lab equipment, reagents and consumables since 2008.",
         },
 
         {
           property: "og:title",
 
           content:
-            "About Human Biomedicals Pvt Ltd",
+            "About Human Biomedical LLP",
         },
 
         {
@@ -130,8 +130,8 @@ export default function AboutPage({
 
         description={
           district
-            ? `Human Biomedicals Pvt Ltd has been a trusted diagnostic partner in ${city}.`
-            : "Human Biomedicals Pvt Ltd has been a trusted partner to clinical laboratories across India since 2008."
+            ? `Human Biomedicals LLP has been a trusted diagnostic partner in ${city}.`
+            : "Human Biomedicals LLP has been a trusted partner to clinical laboratories across India since 2008."
         }
       />
 
@@ -157,7 +157,7 @@ export default function AboutPage({
           <p className="text-muted-foreground leading-relaxed mb-4">
 
             Founded in 2008,
-            Human Biomedicals Pvt Ltd has grown
+            Human Biomedical LLP has grown
             into one of India's most
             trusted suppliers of
             medical laboratory equipment,

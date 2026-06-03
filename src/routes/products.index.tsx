@@ -108,7 +108,11 @@ function ProductsIndex({
 }) {
 
   let routeData: any = {};
+  const [currentPage, setCurrentPage] =
+    useState(1);
 
+  const [itemsPerPage, setItemsPerPage] =
+    useState(10);
   try {
 
     routeData =
@@ -141,7 +145,18 @@ function ProductsIndex({
             ?.toLowerCase() ===
           active.toLowerCase()
       );
+  const totalPages = Math.ceil(
+    filtered.length / itemsPerPage
+  );
 
+  const startIndex =
+    (currentPage - 1) * itemsPerPage;
+
+  const paginatedProducts =
+    filtered.slice(
+      startIndex,
+      startIndex + itemsPerPage
+    );
   const prefix =
     district
       ? `/${district}`
@@ -188,11 +203,10 @@ function ProductsIndex({
                   c.slug
                 }
 
-                onClick={() =>
-                  setActive(
-                    c.slug
-                  )
-                }
+                onClick={() => {
+                  setActive("all");
+                  setCurrentPage(1);
+                }}
               >
 
                 {c.name}
@@ -206,27 +220,77 @@ function ProductsIndex({
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {filtered.map(
+          {paginatedProducts.map(
             (p: any) => (
-
               <ProductCard
                 key={p.id}
                 product={p}
+                district={district}
+                detailLink
               />
-
             )
           )}
 
         </div>
 
-        {filtered.length === 0 && (
+        {filtered.length > 0 && (
+          <div className="mt-10 flex flex-col md:flex-row items-center justify-between gap-4">
 
-          <p className="text-center text-muted-foreground py-16">
+            <div className="flex items-center gap-2">
+              <span>Items Per Page:</span>
 
-            No products found.
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(
+                    Number(e.target.value)
+                  );
+                  setCurrentPage(1);
+                }}
+                className="border rounded px-3 py-2"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
 
-          </p>
+            <div className="flex items-center gap-3">
 
+              <button
+                disabled={currentPage === 1}
+                onClick={() =>
+                  setCurrentPage(
+                    currentPage - 1
+                  )
+                }
+                className="h-10 w-10 rounded bg-gray-200 disabled:opacity-50"
+              >
+                ◀
+              </button>
+
+              <span>
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                disabled={
+                  currentPage === totalPages
+                }
+                onClick={() =>
+                  setCurrentPage(
+                    currentPage + 1
+                  )
+                }
+                className="h-10 w-10 rounded bg-gray-200 text-white disabled:opacity-50"
+              >
+                ▶
+              </button>
+
+            </div>
+
+          </div>
         )}
 
         <div className="mt-12 text-center">

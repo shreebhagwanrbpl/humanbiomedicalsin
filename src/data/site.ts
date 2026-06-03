@@ -1,9 +1,9 @@
 export const site = {
-  name: "Human Biomedicals Pvt Ltd",
-  short: "Human Biomedicals",
+  name: "Human Biomedical LLP",
+  short: "Human Biomedical",
   tagline: "Precision Diagnostics. Trusted Worldwide.",
   description:
-    "Human Biomedicals Pvt Ltd supplies premium medical laboratory equipment, hematology & biochemistry analyzers, reagents and consumables to clinical labs across India.",
+    "Human Biomedical LLP supplies premium medical laboratory equipment, hematology & biochemistry analyzers, reagents and consumables to clinical labs across India.",
   phone: "+91 99833 33469",
   whatsapp: "9199833 33469",
   email: "info@humanbiomedicals.com",

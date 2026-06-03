@@ -29,6 +29,7 @@ import { Route as DistrictContactRouteImport } from './routes/$district/contact'
 import { Route as DistrictBlogRouteImport } from './routes/$district/blog'
 import { Route as DistrictAboutRouteImport } from './routes/$district/about'
 import { Route as ProductsCategoryCategoryRouteImport } from './routes/products.category.$category'
+import { Route as DistrictProductsProductRouteImport } from './routes/$district/products.$product'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -131,6 +132,11 @@ const ProductsCategoryCategoryRoute =
     path: '/products/category/$category',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DistrictProductsProductRoute = DistrictProductsProductRouteImport.update({
+  id: '/$district/products/$product',
+  path: '/$district/products/$product',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/$district/': typeof DistrictIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/products/': typeof ProductsIndexRoute
+  '/$district/products/$product': typeof DistrictProductsProductRoute
   '/products/category/$category': typeof ProductsCategoryCategoryRoute
 }
 export interface FileRoutesByTo {
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/$district': typeof DistrictIndexRoute
   '/blog': typeof BlogIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/$district/products/$product': typeof DistrictProductsProductRoute
   '/products/category/$category': typeof ProductsCategoryCategoryRoute
 }
 export interface FileRoutesById {
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/$district/': typeof DistrictIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/products/': typeof ProductsIndexRoute
+  '/$district/products/$product': typeof DistrictProductsProductRoute
   '/products/category/$category': typeof ProductsCategoryCategoryRoute
 }
 export interface FileRouteTypes {
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/$district/'
     | '/blog/'
     | '/products/'
+    | '/$district/products/$product'
     | '/products/category/$category'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/$district'
     | '/blog'
     | '/products'
+    | '/$district/products/$product'
     | '/products/category/$category'
   id:
     | '__root__'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/$district/'
     | '/blog/'
     | '/products/'
+    | '/$district/products/$product'
     | '/products/category/$category'
   fileRoutesById: FileRoutesById
 }
@@ -288,6 +300,7 @@ export interface RootRouteChildren {
   DistrictIndexRoute: typeof DistrictIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  DistrictProductsProductRoute: typeof DistrictProductsProductRoute
   ProductsCategoryCategoryRoute: typeof ProductsCategoryCategoryRoute
 }
 
@@ -433,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsCategoryCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$district/products/$product': {
+      id: '/$district/products/$product'
+      path: '/$district/products/$product'
+      fullPath: '/$district/products/$product'
+      preLoaderRoute: typeof DistrictProductsProductRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -456,6 +476,7 @@ const rootRouteChildren: RootRouteChildren = {
   DistrictIndexRoute: DistrictIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  DistrictProductsProductRoute: DistrictProductsProductRoute,
   ProductsCategoryCategoryRoute: ProductsCategoryCategoryRoute,
 }
 export const routeTree = rootRouteImport

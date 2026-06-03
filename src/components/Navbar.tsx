@@ -6,16 +6,10 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
+import { Link } from "@tanstack/react-router";
 import logo from "@/assets/humanlogo.png";
 
-interface NavbarProps {
-  district?: string;
-}
-
-export function Navbar({
-  district,
-}: NavbarProps) {
+export function Navbar() {
 
   const [open, setOpen] =
     useState(false);
@@ -46,9 +40,40 @@ export function Navbar({
 
   }, []);
 
+  const pathParts =
+    window.location.pathname
+      .split("/")
+      .filter(Boolean);
+
+  // const district =
+  //   pathParts.length > 0 &&
+  //     ![
+  //       "about",
+  //       "items",
+  //       "services",
+  //       "blog",
+  //       "contact",
+  //       "quote",
+  //     ].includes(pathParts[0])
+  //     ? pathParts[0]
+  //     : "";
+  const reservedRoutes = [
+    "about",
+    "items",
+    "products",
+    "services",
+    "blog",
+    "contact",
+    "quote",
+  ];
+
+  const district =
+    pathParts.length > 0 &&
+      !reservedRoutes.includes(pathParts[0])
+      ? pathParts[0]
+      : "";
   const prefix =
-    district &&
-      district !== "undefined"
+    district
       ? `/${district}`
       : "";
 
@@ -95,10 +120,20 @@ export function Navbar({
       <nav className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
 
         {/* Logo */}
-        <a
+        {/* <a
           href={`${prefix}/`}
           className="flex items-center gap-2 font-bold text-lg"
+        > */}
+        <Link
+          to={district ? "/$district" : "/"}
+          params={
+            district
+              ? { district }
+              : undefined
+          }
+          className="flex items-center gap-2 font-bold text-lg"
         >
+
 
           <div className="flex h-12 w-12 items-center justify-center rounded-lg shadow-soft overflow-hidden">
 
@@ -110,8 +145,8 @@ export function Navbar({
 
           </div>
 
-        </a>
-
+          {/* </a> */}
+        </Link>
         {/* Desktop Menu */}
         <ul className="hidden lg:flex items-center gap-1">
 
