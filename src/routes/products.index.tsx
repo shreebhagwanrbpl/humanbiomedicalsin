@@ -236,7 +236,8 @@ function ProductsIndex({
         {filtered.length > 0 && (
           <div className="mt-10 flex flex-col md:flex-row items-center justify-between gap-4">
 
-            <div className="flex items-center gap-2">
+            {/* Desktop only */}
+            <div className="hidden md:flex items-center gap-2">
               <span>Items Per Page:</span>
 
               <select
@@ -261,9 +262,7 @@ function ProductsIndex({
               <button
                 disabled={currentPage === 1}
                 onClick={() =>
-                  setCurrentPage(
-                    currentPage - 1
-                  )
+                  setCurrentPage(currentPage - 1)
                 }
                 className="h-10 w-10 rounded bg-gray-200 disabled:opacity-50"
               >
@@ -275,15 +274,11 @@ function ProductsIndex({
               </span>
 
               <button
-                disabled={
-                  currentPage === totalPages
-                }
+                disabled={currentPage === totalPages}
                 onClick={() =>
-                  setCurrentPage(
-                    currentPage + 1
-                  )
+                  setCurrentPage(currentPage + 1)
                 }
-                className="h-10 w-10 rounded bg-gray-200 text-white disabled:opacity-50"
+                className="h-10 w-10 rounded bg-gray-200 disabled:opacity-50"
               >
                 ▶
               </button>

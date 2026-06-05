@@ -2,9 +2,7 @@ import { useState } from "react";
 
 import { z } from "zod";
 
-import toast, {
-  Toaster,
-} from "react-hot-toast";
+import { toast } from "sonner";
 
 import {
   addDoc,
@@ -399,9 +397,6 @@ export function QuoteForm({
 
       </form>
 
-      <Toaster
-        position="top-right"
-      />
 
     </>
 

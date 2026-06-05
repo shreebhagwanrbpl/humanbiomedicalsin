@@ -192,6 +192,13 @@ export function Footer() {
 
                 label: "About Us",
               },
+              {
+                to: district
+                  ? "/$district/items"
+                  : "/items",
+
+                label: "Products",
+              },
 
               {
                 to: district
