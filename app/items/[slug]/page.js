@@ -1,6 +1,6 @@
 "use client";
 
-import "./ProductSlug.css";
+import "./productSlug.css";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { doc, getDoc, addDoc, collection } from "firebase/firestore";

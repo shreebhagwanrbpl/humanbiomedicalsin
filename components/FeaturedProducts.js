@@ -1,4 +1,5 @@
 "use client";
+
 import { usePathname } from "next/navigation";
 import "./FeaturedProducts.css";
 import { useEffect, useState } from "react";
@@ -7,10 +8,11 @@ import { db } from "../lib/firebase";
 import Link from "next/link";
 
 export default function FeaturedProducts() {
-
     const [products, setProducts] = useState([]);
-    const pathname = usePathname();
     const [loading, setLoading] = useState(true);
+
+    const pathname = usePathname();
+
     const pathParts = pathname
         .split("/")
         .filter(Boolean);
@@ -19,7 +21,7 @@ export default function FeaturedProducts() {
         "about",
         "items",
         "services",
-        "contact"
+        "contact",
     ];
 
     const district =
@@ -27,12 +29,10 @@ export default function FeaturedProducts() {
             !staticRoutes.includes(pathParts[0])
             ? pathParts[0]
             : "";
+
     useEffect(() => {
-
         const fetchProducts = async () => {
-
             try {
-
                 const snap = await getDoc(
                     doc(
                         db,
@@ -44,113 +44,98 @@ export default function FeaturedProducts() {
                 );
 
                 if (snap.exists()) {
-
                     const allProducts =
                         snap.data().products || [];
 
                     setProducts(
-                        allProducts.slice(0, 3)
+                        allProducts.slice(0, 4)
                     );
                 }
-
-            } catch (err) {
-
-                console.error(err);
-
+            } catch (error) {
+                console.error(error);
             } finally {
-
                 setLoading(false);
-
             }
         };
 
         fetchProducts();
-
     }, []);
 
     if (loading) {
         return (
-            <section className="featured-products">
-
+            <section
+                className="featured-products"
+                key={pathname}
+            >
                 <h2>Featured Products</h2>
 
                 <div className="products-grid">
-
-                    {[1, 2, 3].map((item) => (
-
+                    {[1, 2, 3, 4].map((item) => (
                         <div
                             className="product-card"
                             key={item}
                         >
-
                             <div className="skeleton featured-image-loader"></div>
 
                             <div className="product-content">
-
                                 <div className="skeleton featured-title-loader"></div>
 
                                 <div className="skeleton featured-text-loader"></div>
-
                                 <div className="skeleton featured-text-loader short"></div>
 
                                 <div className="skeleton featured-text-loader"></div>
-
                                 <div className="skeleton featured-text-loader short"></div>
 
                                 <div className="skeleton featured-btn-loader"></div>
-
                             </div>
-
                         </div>
-
                     ))}
-
                 </div>
-
             </section>
         );
     }
+
     return (
-
-        <section className="featured-products">
-
+        <section
+            className="featured-products"
+            key={pathname}
+        >
             <h2>Featured Products</h2>
 
             <div className="products-grid">
-
                 {products.map((product, index) => (
-
                     <div
                         className="product-card"
-                        key={product.slug || product.id || index}
+                        key={`${product.slug || product.id || "product"}-${index}`}
                     >
-
-                        <img
-                            src={
-                                product.image ||
-                                "/placeholder-product.jpg"
-                            }
-                            alt={product.title}
-                        />
+                        <div className="product-image">
+                            <img
+                                src={
+                                    product.image ||
+                                    "/placeholder-product.jpg"
+                                }
+                                alt={product.title}
+                                loading="lazy"
+                            />
+                        </div>
 
                         <div className="product-content">
-
                             <h3>
                                 {product.title}
                             </h3>
 
                             <div className="product-meta">
-
                                 <p>
                                     <strong>Brand:</strong>{" "}
-                                    {product.brand || "N/A"}
+                                    {product.brand ||
+                                        "N/A"}
                                 </p>
 
                                 <p>
                                     <strong>Model:</strong>{" "}
-                                    {product.model || "N/A"}
+                                    {product.model ||
+                                        "N/A"}
                                 </p>
-
                             </div>
 
                             <Link
@@ -163,17 +148,12 @@ export default function FeaturedProducts() {
                             >
                                 View Details
                             </Link>
-
                         </div>
-
                     </div>
-
                 ))}
-
             </div>
 
             <div className="view-all-btn-wrap">
-
                 <Link
                     href={
                         district
@@ -184,9 +164,7 @@ export default function FeaturedProducts() {
                 >
                     View All Products
                 </Link>
-
             </div>
-
         </section>
     );
 }

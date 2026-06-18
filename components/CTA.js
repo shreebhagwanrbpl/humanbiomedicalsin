@@ -16,6 +16,8 @@ export default function CTA() {
         "contact"
     ];
 
+
+
     const district =
         pathParts[0] &&
             !staticRoutes.includes(pathParts[0])
