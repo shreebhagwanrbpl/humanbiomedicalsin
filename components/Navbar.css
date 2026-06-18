@@ -1,0 +1,283 @@
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 999999;
+
+    background: linear-gradient(135deg,
+            #0f4c81 0%,
+            #146ca4 50%,
+            #00a8cc 100%);
+
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.navbar-container {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+
+    padding: 16px 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* =========================
+   LOGO
+========================= */
+
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    z-index: 1001;
+}
+
+.logo img {
+    width: auto;
+    height: 60px;
+    object-fit: contain;
+}
+
+/* =========================
+   NAV LINKS
+========================= */
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 40px;
+    flex: 1;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    color: #ffd166;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.quote-btn {
+    background: #fff;
+    color: #0f4c81;
+
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+
+    padding: 12px 24px;
+    border-radius: 8px;
+
+    transition: 0.3s;
+}
+
+.quote-btn:hover {
+    background: #0f4c81;
+    color: #fff;
+}
+
+.mobile-btn {
+    display: none;
+}
+
+/* =========================
+   HAMBURGER
+========================= */
+
+.hamburger {
+    display: none;
+
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 6px;
+
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    z-index: 1001;
+}
+
+.hamburger span {
+    width: 30px;
+    height: 3px;
+
+    background: white;
+    border-radius: 50px;
+
+    transition: 0.3s;
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 1100px) {
+
+    .navbar-container {
+        padding: 16px 24px;
+    }
+
+    .nav-links {
+        gap: 24px;
+    }
+
+    .nav-links a {
+        font-size: 15px;
+    }
+
+    .quote-btn {
+        padding: 10px 18px;
+    }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 992px) {
+    .navbar {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 999999;
+    }
+
+    .navbar-container {
+        width: 100%;
+        padding: 12px 16px;
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .logo {
+        margin-right: auto;
+    }
+
+    .logo img {
+        height: 38px;
+        width: auto;
+    }
+
+    .desktop-btn {
+        display: none;
+    }
+
+    .hamburger {
+        display: flex;
+        margin-left: auto;
+    }
+
+    .hamburger span {
+        width: 28px;
+        height: 3px;
+    }
+
+    .nav-links {
+        position: fixed;
+
+        top: 62px;
+        left: -100%;
+
+        width: 100%;
+        height: calc(100vh - 62px);
+
+        background: #0f4c81;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+
+        gap: 28px;
+
+        padding-top: 35px;
+
+        transition: 0.3s ease;
+    }
+
+    .nav-links.active {
+        left: 0;
+    }
+
+    .nav-links a {
+        font-size: 18px;
+    }
+
+    .mobile-btn {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        min-width: 140px;
+
+        background: #fff;
+        color: #0f4c81 !important;
+
+        padding: 12px 20px;
+
+        border-radius: 8px;
+
+        margin-top: 10px;
+    }
+}
+
+/* =========================
+   SMALL MOBILE
+========================= */
+
+@media (max-width: 576px) {
+
+    .logo img {
+        height: 34px;
+    }
+
+    .nav-links a {
+        font-size: 17px;
+    }
+
+    .mobile-btn {
+        min-width: 130px;
+        font-size: 14px;
+    }
+}

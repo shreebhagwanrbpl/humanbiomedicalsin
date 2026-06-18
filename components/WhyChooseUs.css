@@ -1,0 +1,28 @@
+.why-section {
+    padding: 100px 20px;
+}
+
+.why-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.why-header h2 {
+    font-size: 42px;
+}
+
+.why-grid {
+    max-width: 1300px;
+    margin: auto;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.why-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .08);
+}
