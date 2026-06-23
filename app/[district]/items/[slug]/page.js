@@ -1,5 +1,5 @@
-import ProductPage from "../../../items/[slug]/page";
+import ProductDetails from "../../../items/[slug]/ProductDetails";
 
 export default function DistrictProductPage() {
-    return <ProductPage />;
+    return <ProductDetails />;
 }

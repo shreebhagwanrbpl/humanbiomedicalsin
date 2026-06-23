@@ -1,16 +1,25 @@
 import ItemsPage from "../../items/page";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({
+  params,
+}) {
 
-  const { district } = await params;
+  const district =
+    params?.district || "";
 
   const city = district
     .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replace(
+      /\b\w/g,
+      (c) => c.toUpperCase()
+    );
 
   return {
-    title: `Biomedical Equipment in ${city}`,
-    description: `Buy biomedical equipment and diagnostic analyzers in ${city}.`,
+    title:
+      `Biomedical Equipment in ${city} | Human Biomedicals`,
+
+    description:
+      `Buy biomedical equipment and diagnostic analyzers in ${city}.`,
   };
 }
 
