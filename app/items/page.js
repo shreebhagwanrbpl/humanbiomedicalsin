@@ -1,16 +1,66 @@
 "use client";
+
 import { usePathname } from "next/navigation";
 import "./Products.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import { ChevronUp } from "lucide-react";
+import {
+    ChevronDown,
+    ChevronRight,
+} from "lucide-react";
+
+const makeSlug = (text = "") =>
+    text
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-");
+
+const getCategory = (item) => {
+
+    const title = (item.title || "").toLowerCase();
+
+    if (title.includes("rapid"))
+        return "Rapid Test Kits";
+
+    if (title.includes("elisa"))
+        return "ELISA Kits";
+
+    if (title.includes("electrolyte"))
+        return "Electrolyte Reagents";
+
+    if (title.includes("hematology"))
+        return "Hematology";
+
+    if (title.includes("biochemistry"))
+        return "Biochemistry";
+
+    if (title.includes("immuno"))
+        return "Immunoassay";
+
+    return "Other Products";
+
+};
 
 export default function ItemPage() {
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showTopButton, setShowTopButton] = useState(false);
+
     const [search, setSearch] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
+
+    const [openedCategory, setOpenedCategory] =
+        useState("");
+
+    const [activeCategory, setActiveCategory] =
+        useState("");
+
+    const [pendingScroll, setPendingScroll] =
+        useState(null);
+
     const pathname = usePathname();
 
     const pathParts = pathname
@@ -21,7 +71,7 @@ export default function ItemPage() {
         "about",
         "items",
         "services",
-        "contact"
+        "contact",
     ];
 
     const district =
@@ -35,16 +85,15 @@ export default function ItemPage() {
             .replace(/-/g, " ")
             .replace(/\b\w/g, c => c.toUpperCase())
         : "";
-    const productsPerPage = 12;
-    const filteredProducts = products.filter((product) =>
-        product.title
-            ?.toLowerCase()
-            .includes(search.toLowerCase())
-    );
+
     useEffect(() => {
+
         const fetchProducts = async () => {
+
             try {
+
                 const snap = await getDoc(
+
                     doc(
                         db,
                         "websites",
@@ -52,70 +101,241 @@ export default function ItemPage() {
                         "pages",
                         "products"
                     )
+
                 );
 
                 if (snap.exists()) {
+
                     const allProducts =
                         snap.data().products || [];
 
+                    const published =
+                        allProducts
+                            .filter(
+                                (item) =>
+                                    item.isPublished !== false
+                            )
+                            .map(
+                                (
+                                    item,
+                                    index
+                                ) => ({
+
+                                    ...item,
+
+                                    uid: index,
+
+                                    slug:
+                                        item.slug ||
+                                        makeSlug(item.title),
+
+                                    category:
+                                        item.category ||
+                                        getCategory(item),
+
+                                })
+                            );
+
                     setProducts(
-                        allProducts.filter(
-                            (item) => item.isPublished !== false
-                        )
+                        published
                     );
+
                 }
+
             } catch (err) {
+
                 console.error(err);
+
             } finally {
+
                 setLoading(false);
+
             }
+
         };
 
         fetchProducts();
+
     }, []);
 
-    const totalPages = Math.ceil(
-        filteredProducts.length / productsPerPage
-    );
+    const filteredProducts =
+        useMemo(() => {
 
-    const startIndex =
-        (currentPage - 1) * productsPerPage;
+            return products.filter(
+                (item) => {
 
-    const currentProducts =
-        filteredProducts.slice(
-            startIndex,
-            startIndex + productsPerPage
+                    const text = `
+                    ${item.title}
+                    ${item.brand}
+                    ${item.model}
+                    ${item.category}
+                    `
+                        .toLowerCase();
+
+                    return text.includes(
+                        search.toLowerCase()
+                    );
+
+                }
+            );
+
+        }, [products, search]);
+
+    const groupedProducts =
+        useMemo(() => {
+
+            const obj = {};
+
+            filteredProducts.forEach(
+                (item) => {
+
+                    if (
+                        !obj[item.category]
+                    ) {
+
+                        obj[item.category] = [];
+
+                    }
+
+                    obj[item.category].push(
+                        item
+                    );
+
+                }
+            );
+
+            return Object.entries(obj);
+
+        }, [filteredProducts]);
+
+    const toggleCategory = (
+        category
+    ) => {
+
+        if (
+            openedCategory ===
+            category
+        ) {
+
+            setOpenedCategory("");
+
+            return;
+
+        }
+
+        setOpenedCategory(
+            category
         );
 
-    const getVisiblePages = () => {
-
-        if (totalPages <= 3) {
-            return Array.from(
-                { length: totalPages },
-                (_, i) => i + 1
-            );
-        }
-
-        if (currentPage === 1) {
-            return [1, 2, 3];
-        }
-
-        if (currentPage === totalPages) {
-            return [
-                totalPages - 2,
-                totalPages - 1,
-                totalPages
-            ];
-        }
-
-        return [
-            currentPage - 1,
-            currentPage,
-            currentPage + 1
-        ];
     };
+
+    const scrollToProduct = (
+        slug,
+        category
+    ) => {
+
+        setOpenedCategory(
+            category
+        );
+
+        setActiveCategory(
+            category
+        );
+
+        setPendingScroll(
+            slug
+        );
+
+    };
+
+    useEffect(() => {
+
+        if (!pendingScroll)
+            return;
+
+        const timer =
+            setTimeout(() => {
+
+                const el =
+                    document.getElementById(
+                        pendingScroll
+                    );
+
+                if (el) {
+
+                    el.scrollIntoView({
+
+                        behavior: "smooth",
+
+                        block: "start",
+
+                    });
+
+                }
+
+                setPendingScroll(
+                    null
+                );
+
+            }, 250);
+
+        return () =>
+            clearTimeout(timer);
+
+    }, [
+        openedCategory,
+        pendingScroll,
+    ]);
+
+
+useEffect(() => {
+
+    const handleScroll = () => {
+
+        if (window.scrollY > 400) {
+
+            setShowTopButton(true);
+
+        } else {
+
+            setShowTopButton(false);
+
+        }
+
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () =>
+        window.removeEventListener(
+            "scroll",
+            handleScroll
+        );
+
+}, []);
+
+const scrollToTop = () => {
+
+    window.scrollTo({
+
+        top: 0,
+
+        behavior: "smooth",
+
+    });
+
+};
+
+
+
+
+
+
+
     if (loading) {
+
         return (
+
             <main className="products-page">
 
                 <div className="products-hero">
@@ -127,6 +347,7 @@ export default function ItemPage() {
                         </span>
 
                         <h1>
+
                             Advanced Laboratory &
                             Diagnostic Equipment
 
@@ -136,6 +357,7 @@ export default function ItemPage() {
                                     In {city}
                                 </>
                             )}
+
                         </h1>
 
                     </div>
@@ -145,6 +367,7 @@ export default function ItemPage() {
                 <div className="products-grid">
 
                     {[1, 2, 3, 4, 5, 6].map((item) => (
+
                         <div
                             className="product-card"
                             key={item}
@@ -165,14 +388,19 @@ export default function ItemPage() {
                             </div>
 
                         </div>
+
                     ))}
 
                 </div>
 
             </main>
+
         );
+
     }
+
     return (
+
         <main className="products-page">
 
             <div className="products-hero">
@@ -180,20 +408,29 @@ export default function ItemPage() {
                 <div className="products-hero-content">
 
                     <span className="products-badge">
+
                         Biomedical Equipment Catalog
+
                     </span>
 
                     <h1>
+
                         Advanced Laboratory &
                         Diagnostic Equipment
+
                     </h1>
 
                     <p>
-                        Discover premium biomedical, laboratory and
-                        hospital equipment designed for healthcare
-                        institutions, research centers and diagnostic labs
 
-                        {city && ` in ${city}`}.
+                        Discover premium biomedical,
+                        laboratory and hospital
+                        equipment designed for
+                        healthcare institutions,
+                        research centers and
+                        diagnostic labs
+
+                        {city && ` in ${city}`}
+
                     </p>
 
                 </div>
@@ -206,10 +443,9 @@ export default function ItemPage() {
                     type="text"
                     placeholder="Search products..."
                     value={search}
-                    onChange={(e) => {
-                        setSearch(e.target.value);
-                        setCurrentPage(1);
-                    }}
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
                 />
 
             </div>
@@ -217,140 +453,329 @@ export default function ItemPage() {
             <div className="products-top-bar">
 
                 <span>
+
                     Total Products :
+
                     <strong>
+
                         {" "}
                         {filteredProducts.length}
+
                     </strong>
+
                 </span>
 
             </div>
 
-            <div className="products-grid">
+            <div className="products-layout">
 
-                {currentProducts.map(
-                    (product, index) => (
+                                <aside className="products-sidebar">
 
-                        <div
-                            className="product-card"
-                            key={index}
-                        >
+                    <h3 className="sidebar-title">
 
-                            <div className="product-image">
+                        Categories
 
-                                <img
-                                    src={
-                                        product.image ||
-                                        "https://via.placeholder.com/400x250"
-                                    }
-                                    alt={product.title}
-                                />
+                    </h3>
 
-                            </div>
+                    <div className="accordion-wrapper">
 
-                            <div className="product-content">
-                                <h3>{product.title}</h3>
+                        {groupedProducts.map(
+                            ([category, items]) => (
 
-                                <div className="product-meta">
+                                <div
+                                    className="accordion-item"
+                                    key={category}
+                                >
 
-                                    <span>
-                                        <strong>Brand:</strong> {product.brand}
-                                    </span>
-
-                                    <span>
-                                        <strong>Model:</strong> {product.model}
-                                    </span>
-
-                                </div>
-
-                                <div className="product-buttons">
                                     <button
-                                        className="quote-btn-product"
+                                        className={`accordion-header ${
+                                            activeCategory === category
+                                                ? "active"
+                                                : ""
+                                        }`}
                                         onClick={() =>
-                                            window.location.href =
-                                            district
-                                                ? `/${district}/items/${product.slug}`
-                                                : `/items/${product.slug}`
+                                            toggleCategory(
+                                                category
+                                            )
                                         }
                                     >
-                                        Get Quote
+
+                                        <span className="accordion-left">
+
+                                            {openedCategory ===
+                                            category ? (
+                                                <ChevronDown
+                                                    size={18}
+                                                />
+                                            ) : (
+                                                <ChevronRight
+                                                    size={18}
+                                                />
+                                            )}
+
+                                            {category}
+
+                                        </span>
+
+                                        <span className="accordion-count">
+
+                                            {items.length}
+
+                                        </span>
+
                                     </button>
+
+                                    <div
+                                        className={`accordion-content ${
+                                            openedCategory ===
+                                            category
+                                                ? "open"
+                                                : ""
+                                        }`}
+                                    >
+
+                                        {items.map(
+                                            (
+                                                product
+                                            ) => (
+
+                                                <button
+                                                    key={
+                                                        product.uid
+                                                    }
+                                                    className="accordion-link"
+                                                    onClick={() =>
+                                                        scrollToProduct(
+                                                            product.slug,
+                                                            category
+                                                        )
+                                                    }
+                                                >
+
+                                                    {
+                                                        product.title
+                                                    }
+
+                                                </button>
+
+                                            )
+                                        )}
+
+                                    </div>
 
                                 </div>
 
-                            </div>
-
-                        </div>
-
-                    )
-                )}
-
-            </div>
-
-            {/* Pagination */}
-
-            <div className="pagination-wrapper">
-
-                <div className="pagination-info">
-                    Page {currentPage} of {totalPages}
-                </div>
-
-                <div className="pagination">
-
-                    <button
-                        onClick={() =>
-                            setCurrentPage(
-                                currentPage - 1
                             )
-                        }
-                        disabled={
-                            currentPage === 1
-                        }
-                    >
-                        ◀
-                    </button>
+                        )}
 
-                    {getVisiblePages().map(
-                        (page) => (
+                    </div>
 
-                            <button
-                                key={page}
-                                onClick={() =>
-                                    setCurrentPage(
-                                        page
-                                    )
-                                }
-                                className={
-                                    currentPage ===
-                                        page
-                                        ? "active"
-                                        : ""
-                                }
+                </aside>
+
+                {/* RIGHT SIDE */}
+
+                <div className="products-right">
+
+                    {groupedProducts.map(
+                        ([category, items]) => (
+
+                            <section
+                                key={category}
+                                className="category-section"
                             >
-                                {page}
-                            </button>
+
+                                <div className="category-header">
+
+                                    <h2>
+                                        {category}
+                                    </h2>
+
+                                    <span>
+
+                                        {items.length} Products
+
+                                    </span>
+
+                                </div>
+
+                                <div className="category-products">
+
+                                    {items.map(
+                                        (
+                                            product
+                                        ) => (
+
+                                            <div
+                                                key={
+                                                    product.uid
+                                                }
+                                                id={
+                                                    product.slug
+                                                }
+                                                className="product-row"
+                                            >
+
+                                                {/* IMAGE */}
+
+                                                <div className="product-row-image">
+
+                                                    <img
+                                                        src={
+                                                            product.image ||
+                                                            "https://via.placeholder.com/400x300"
+                                                        }
+                                                        alt={
+                                                            product.title
+                                                        }
+                                                    />
+
+                                                </div>
+
+                                                {/* CONTENT */}
+
+                                                <div className="product-row-content">
+
+                                                    <h3>
+
+                                                        {
+                                                            product.title
+                                                        }
+
+                                                    </h3>
+
+                                                    <p>
+
+                                                        {product.description ||
+                                                            product.desc ||
+                                                            "Premium biomedical equipment designed for hospitals, laboratories and healthcare institutions."}
+
+                                                    </p>
+
+                                                    <div className="product-info-grid">
+
+                                                        <div className="info-box">
+
+                                                            <span>
+
+                                                                Brand
+
+                                                            </span>
+
+                                                            <strong>
+
+                                                                {product.brand ||
+                                                                    "N/A"}
+
+                                                            </strong>
+
+                                                        </div>
+
+                                                        <div className="info-box">
+
+                                                            <span>
+
+                                                                Model
+
+                                                            </span>
+
+                                                            <strong>
+
+                                                                {product.model ||
+                                                                    "N/A"}
+
+                                                            </strong>
+
+                                                        </div>
+
+                                                        <div className="info-box">
+
+                                                            <span>
+
+                                                                Instrument
+
+                                                            </span>
+
+                                                            <strong>
+
+                                                                {product.instrument ||
+                                                                    "N/A"}
+
+                                                            </strong>
+
+                                                        </div>
+
+
+                                                                                                                <div className="info-box">
+
+                                                            <span>
+
+                                                                Category
+
+                                                            </span>
+
+                                                            <strong>
+
+                                                                {
+                                                                    product.category
+                                                                }
+
+                                                            </strong>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                                {/* BUTTON */}
+
+                                                <div className="product-row-action">
+
+                                                    <button
+                                                        className="quote-btn-product"
+                                                        onClick={() =>
+                                                            window.location.href =
+                                                                district
+                                                                    ? `/${district}/items/${product.slug}`
+                                                                    : `/items/${product.slug}`
+                                                        }
+                                                    >
+
+                                                        Get Quote
+
+                                                    </button>
+
+                                                </div>
+
+                                            </div>
+
+                                        )
+                                    )}
+
+                                </div>
+
+                            </section>
 
                         )
                     )}
 
-                    <button
-                        onClick={() =>
-                            setCurrentPage(
-                                currentPage + 1
-                            )
-                        }
-                        disabled={
-                            currentPage ===
-                            totalPages
-                        }
-                    >
-                        ▶
-                    </button>
-
                 </div>
 
             </div>
+                    {showTopButton && (
 
+                        <button
+                            onClick={scrollToTop}
+                            className="back-to-top"
+                        >
+
+                            <ChevronUp size={24} />
+
+                        </button>
+
+                    )}
         </main>
+
     );
+
 }
