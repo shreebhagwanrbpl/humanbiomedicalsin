@@ -3,7 +3,12 @@
 import { usePathname } from "next/navigation";
 import "./Products.css";
 import { useState, useEffect, useMemo } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import {
+    doc,
+    getDoc,
+    getDocs,
+    collection,
+} from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { ChevronUp } from "lucide-react";
 import {
@@ -18,31 +23,7 @@ const makeSlug = (text = "") =>
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-");
 
-const getCategory = (item) => {
 
-    const title = (item.title || "").toLowerCase();
-
-    if (title.includes("rapid"))
-        return "Rapid Test Kits";
-
-    if (title.includes("elisa"))
-        return "ELISA Kits";
-
-    if (title.includes("electrolyte"))
-        return "Electrolyte Reagents";
-
-    if (title.includes("hematology"))
-        return "Hematology";
-
-    if (title.includes("biochemistry"))
-        return "Biochemistry";
-
-    if (title.includes("immuno"))
-        return "Immunoassay";
-
-    return "Other Products";
-
-};
 
 export default function ItemPage() {
 
@@ -54,7 +35,7 @@ export default function ItemPage() {
 
     const [openedCategory, setOpenedCategory] =
         useState("");
-
+    const [categories, setCategories] = useState([]);
     const [activeCategory, setActiveCategory] =
         useState("");
 
@@ -89,11 +70,50 @@ export default function ItemPage() {
     useEffect(() => {
 
         const fetchProducts = async () => {
-
             try {
 
-                const snap = await getDoc(
+                // Categories
+                const categorySnap = await getDocs(
+                    collection(
+                        db,
+                        "websites",
+                        "humanbiomedicalsin",
+                        "pages",
+                        "categoryproducts",
+                        "categories"
+                    )
+                );
 
+                const categoryList = [];
+                let categoryProducts = [];
+
+                categorySnap.forEach((d) => {
+                    const data = d.data();
+
+                    categoryList.push({
+                        id: d.id,
+                        ...data,
+                        name: data.category || d.id,
+                    });
+
+                    if (data.products?.length) {
+                        const formatted = data.products.map((p, index) => ({
+                            ...p,
+                            uid: `${d.id}-${index}`,
+                            category: data.category || d.id,
+                            slug:
+                                p.slug ||
+                                makeSlug(p.title),
+                        }));
+
+                        categoryProducts.push(...formatted);
+                    }
+                });
+
+                setCategories(categoryList);
+
+                // Other Products
+                const productsSnap = await getDoc(
                     doc(
                         db,
                         "websites",
@@ -101,63 +121,44 @@ export default function ItemPage() {
                         "pages",
                         "products"
                     )
-
                 );
 
-                if (snap.exists()) {
+                let otherProducts = [];
 
-                    const allProducts =
-                        snap.data().products || [];
-
-                    const published =
-                        allProducts
+                if (productsSnap.exists()) {
+                    otherProducts =
+                        (productsSnap.data().products || [])
                             .filter(
                                 (item) =>
                                     item.isPublished !== false
                             )
-                            .map(
-                                (
-                                    item,
-                                    index
-                                ) => ({
-
-                                    ...item,
-
-                                    uid: index,
-
-                                    slug:
-                                        item.slug ||
-                                        makeSlug(item.title),
-
-                                    category:
-                                        item.category ||
-                                        getCategory(item),
-
-                                })
-                            );
-
-                    setProducts(
-                        published
-                    );
-
+                            .map((item, index) => ({
+                                ...item,
+                                uid: `other-${index}`,
+                                slug:
+                                    item.slug ||
+                                    makeSlug(item.title),
+                                category:
+                                    item.category ||
+                                    "Other Products",
+                            }));
                 }
 
+                setProducts([
+                    ...categoryProducts,
+                    ...otherProducts,
+                ]);
+
             } catch (err) {
-
                 console.error(err);
-
             } finally {
-
                 setLoading(false);
-
             }
-
         };
 
         fetchProducts();
 
     }, []);
-
     const filteredProducts =
         useMemo(() => {
 
@@ -181,32 +182,43 @@ export default function ItemPage() {
 
         }, [products, search]);
 
-    const groupedProducts =
-        useMemo(() => {
+    const groupedProducts = useMemo(() => {
 
-            const obj = {};
+        const grouped = {};
 
-            filteredProducts.forEach(
-                (item) => {
+        categories.forEach((cat) => {
+            grouped[cat.name] = [];
+        });
 
-                    if (
-                        !obj[item.category]
-                    ) {
+        grouped["Other Products"] = [];
 
-                        obj[item.category] = [];
+        filteredProducts.forEach((product) => {
 
-                    }
+            const categoryName =
+                product.category &&
+                    grouped[product.category]
+                    ? product.category
+                    : "Other Products";
 
-                    obj[item.category].push(
-                        item
-                    );
+            grouped[categoryName].push(product);
 
-                }
-            );
+        });
 
-            return Object.entries(obj);
+        return Object.entries(grouped)
+            .filter(([_, items]) => items.length > 0)
+            .sort(([a], [b]) => {
 
-        }, [filteredProducts]);
+                if (a === "Other Products")
+                    return 1;
+
+                if (b === "Other Products")
+                    return -1;
+
+                return 0;
+
+            });
+
+    }, [filteredProducts, categories]);
 
     const toggleCategory = (
         category
@@ -288,43 +300,43 @@ export default function ItemPage() {
     ]);
 
 
-useEffect(() => {
+    useEffect(() => {
 
-    const handleScroll = () => {
+        const handleScroll = () => {
 
-        if (window.scrollY > 400) {
+            if (window.scrollY > 400) {
 
-            setShowTopButton(true);
+                setShowTopButton(true);
 
-        } else {
+            } else {
 
-            setShowTopButton(false);
+                setShowTopButton(false);
 
-        }
+            }
+
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        return () =>
+            window.removeEventListener(
+                "scroll",
+                handleScroll
+            );
+
+    }, []);
+
+    const scrollToTop = () => {
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth",
+
+        });
 
     };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () =>
-        window.removeEventListener(
-            "scroll",
-            handleScroll
-        );
-
-}, []);
-
-const scrollToTop = () => {
-
-    window.scrollTo({
-
-        top: 0,
-
-        behavior: "smooth",
-
-    });
-
-};
 
 
 
@@ -437,39 +449,11 @@ const scrollToTop = () => {
 
             </div>
 
-            <div className="search-section">
 
-                <input
-                    type="text"
-                    placeholder="Search products..."
-                    value={search}
-                    onChange={(e) =>
-                        setSearch(e.target.value)
-                    }
-                />
-
-            </div>
-
-            <div className="products-top-bar">
-
-                <span>
-
-                    Total Products :
-
-                    <strong>
-
-                        {" "}
-                        {filteredProducts.length}
-
-                    </strong>
-
-                </span>
-
-            </div>
 
             <div className="products-layout">
 
-                                <aside className="products-sidebar">
+                <aside className="products-sidebar">
 
                     <h3 className="sidebar-title">
 
@@ -488,11 +472,10 @@ const scrollToTop = () => {
                                 >
 
                                     <button
-                                        className={`accordion-header ${
-                                            activeCategory === category
-                                                ? "active"
-                                                : ""
-                                        }`}
+                                        className={`accordion-header ${activeCategory === category
+                                            ? "active"
+                                            : ""
+                                            }`}
                                         onClick={() =>
                                             toggleCategory(
                                                 category
@@ -503,7 +486,7 @@ const scrollToTop = () => {
                                         <span className="accordion-left">
 
                                             {openedCategory ===
-                                            category ? (
+                                                category ? (
                                                 <ChevronDown
                                                     size={18}
                                                 />
@@ -526,12 +509,11 @@ const scrollToTop = () => {
                                     </button>
 
                                     <div
-                                        className={`accordion-content ${
-                                            openedCategory ===
+                                        className={`accordion-content ${openedCategory ===
                                             category
-                                                ? "open"
-                                                : ""
-                                        }`}
+                                            ? "open"
+                                            : ""
+                                            }`}
                                     >
 
                                         {items.map(
@@ -575,6 +557,7 @@ const scrollToTop = () => {
                 {/* RIGHT SIDE */}
 
                 <div className="products-right">
+
 
                     {groupedProducts.map(
                         ([category, items]) => (
@@ -705,7 +688,7 @@ const scrollToTop = () => {
                                                         </div>
 
 
-                                                                                                                <div className="info-box">
+                                                        <div className="info-box">
 
                                                             <span>
 
@@ -735,9 +718,9 @@ const scrollToTop = () => {
                                                         className="quote-btn-product"
                                                         onClick={() =>
                                                             window.location.href =
-                                                                district
-                                                                    ? `/${district}/items/${product.slug}`
-                                                                    : `/items/${product.slug}`
+                                                            district
+                                                                ? `/${district}/items/${product.slug}`
+                                                                : `/items/${product.slug}`
                                                         }
                                                     >
 
@@ -762,18 +745,18 @@ const scrollToTop = () => {
                 </div>
 
             </div>
-                    {showTopButton && (
+            {showTopButton && (
 
-                        <button
-                            onClick={scrollToTop}
-                            className="back-to-top"
-                        >
+                <button
+                    onClick={scrollToTop}
+                    className="back-to-top"
+                >
 
-                            <ChevronUp size={24} />
+                    <ChevronUp size={24} />
 
-                        </button>
+                </button>
 
-                    )}
+            )}
         </main>
 
     );
