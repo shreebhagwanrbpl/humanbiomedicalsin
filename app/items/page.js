@@ -446,11 +446,27 @@ export default function ItemPage() {
                     </p>
 
                 </div>
-
             </div>
 
-
-
+            <div className="search-section">
+                <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={search}
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
+                />
+            </div>
+            <div className="products-top-bar">
+                <span>
+                    Total Products :
+                    <strong>
+                        {" "}
+                        {filteredProducts.length}
+                    </strong>
+                </span>
+            </div>
             <div className="products-layout">
 
                 <aside className="products-sidebar">
