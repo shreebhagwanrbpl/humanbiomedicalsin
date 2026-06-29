@@ -162,19 +162,6 @@
 
 .products-sidebar {
 
-    position: -webkit-sticky;
-
-    position: sticky;
-
-    top: 90px;
-
-    align-self: start;
-
-    height: fit-content;
-
-    max-height: none;
-
-    overflow: visible;
 
     background: #fff;
 
