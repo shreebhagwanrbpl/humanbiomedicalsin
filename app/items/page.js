@@ -386,27 +386,17 @@ export default function ItemPage() {
                         >
 
                             <div className="skeleton product-image-loader"></div>
-
                             <div className="product-content">
-
                                 <div className="skeleton title-loader"></div>
-
                                 <div className="skeleton text-loader"></div>
-
                                 <div className="skeleton text-loader short"></div>
-
                                 <div className="skeleton btn-loader"></div>
 
                             </div>
-
                         </div>
-
                     ))}
-
                 </div>
-
             </main>
-
         );
 
     }

@@ -3,11 +3,14 @@
 
 import "./productSlug.css";
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { doc, getDoc, addDoc, collection } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import toast from "react-hot-toast";
-
+import {
+    FaShareAlt,
+    FaPlay,
+} from "react-icons/fa";
 export default function ProductDetails() {
 
     const { slug } = useParams();
@@ -19,6 +22,9 @@ export default function ProductDetails() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(true);
+    const [selectedImage, setSelectedImage] = useState("");
+const [selectedMedia, setSelectedMedia] = useState("image");
+const shareRef = useRef();
 
     useEffect(() => {
 
@@ -41,12 +47,19 @@ export default function ProductDetails() {
                     const products =
                         snap.data().products || [];
 
-                    const found =
-                        products.find(
-                            item => item.slug === slug
-                        );
+                    const found = products.find(
+    item => item.slug === slug
+);
 
-                    setProduct(found);
+setProduct(found);
+
+if (found) {
+    setSelectedImage(
+        found.images?.[0] || found.image
+    );
+
+    setSelectedMedia("image");
+}
                 }
 
             } catch (err) {
@@ -149,6 +162,26 @@ export default function ProductDetails() {
         }
     };
 
+
+    const handleShare = async () => {
+    try {
+        if (navigator.share) {
+            await navigator.share({
+                title: product.title,
+                text: product.desc,
+                url: window.location.href,
+            });
+        } else {
+            await navigator.clipboard.writeText(
+                window.location.href
+            );
+            toast.success("Link Copied");
+        }
+    } catch (err) {
+        console.log(err);
+    }
+};
+
     if (loading) {
         return (
             <div className="product-details-page">
@@ -184,18 +217,185 @@ export default function ProductDetails() {
             <div className="product-details-container">
 
                 <div className="product-image-box">
-                    <img
-                        src={
-                            product.image ||
-                            "https://via.placeholder.com/700x500"
-                        }
-                        alt={product.title}
-                    />
+                  <>
+{selectedMedia==="video" && product.video ? (
+
+<video
+controls
+className="product-detail-image"
+>
+
+<source
+src={product.video}
+type="video/mp4"
+/>
+
+</video>
+
+) : (
+
+<img
+src={
+selectedImage ||
+product.image ||
+"https://via.placeholder.com/700x500"
+}
+alt={product.title}
+className="product-detail-image"
+/>
+
+)}
+
+<div
+style={{
+display:"flex",
+gap:"10px",
+marginTop:"20px",
+overflowX:"auto"
+}}
+>
+
+{(product.images?.length
+?product.images
+:[product.image]
+).map((img,index)=>(
+
+<img
+key={index}
+src={img}
+onClick={()=>{
+
+setSelectedImage(img);
+
+setSelectedMedia("image");
+
+}}
+style={{
+width:80,
+height:80,
+objectFit:"cover",
+borderRadius:10,
+cursor:"pointer",
+border:selectedImage===img
+?"2px solid #2563eb"
+:"1px solid #ddd",
+flexShrink:0
+}}
+/>
+
+))}
+
+{product.video&&(
+
+<div
+onClick={()=>setSelectedMedia("video")}
+style={{
+width:80,
+height:80,
+borderRadius:10,
+overflow:"hidden",
+cursor:"pointer",
+position:"relative",
+flexShrink:0
+}}
+>
+
+<video
+src={product.video}
+muted
+style={{
+width:"100%",
+height:"100%",
+objectFit:"cover",
+pointerEvents:"none"
+}}
+/>
+
+<div
+style={{
+position:"absolute",
+inset:0,
+background:"rgba(0,0,0,.35)",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+color:"#fff",
+fontSize:24
+}}
+>
+
+<FaPlay/>
+
+</div>
+
+</div>
+
+)}
+
+{product.pdf&&(
+
+<a
+href={product.pdf}
+target="_blank"
+style={{
+width:80,
+height:80,
+background:"#8B1E1E",
+color:"#fff",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+borderRadius:10,
+textDecoration:"none",
+fontWeight:700,
+flexShrink:0
+}}
+>
+
+PDF
+
+</a>
+
+)}
+
+</div>
+
+</>
                 </div>
 
                 <div className="product-info">
 
-                    <h1>{product.title}</h1>
+                    <div
+style={{
+display:"flex",
+justifyContent:"space-between",
+alignItems:"center",
+marginBottom:20
+}}
+>
+
+<h1>
+
+{product.title}
+
+</h1>
+
+<button
+className="submit-btn"
+style={{
+width:52,
+height:52,
+padding:0,
+borderRadius:"50%"
+}}
+onClick={handleShare}
+>
+
+<span style={{fontSize:"20px"}}>🔗</span>
+
+</button>
+
+</div>
 
                     <p className="product-description">
                         {product.desc}
