@@ -326,6 +326,114 @@ export default function ItemPage() {
 
     }, []);
 
+    useEffect(() => {
+
+        const sidebar =
+            document.querySelector(".products-sidebar");
+
+        const wrapper =
+            document.getElementById("sidebarWrapper");
+
+        const layout =
+            document.querySelector(".products-layout");
+
+        if (!sidebar || !wrapper || !layout)
+            return;
+
+        const startPosition =
+            wrapper.getBoundingClientRect().top +
+            window.scrollY -
+            90;
+
+        const handleSticky = () => {
+
+            if (window.innerWidth < 992) {
+
+                sidebar.style.position = "";
+                sidebar.style.top = "";
+                sidebar.style.left = "";
+                sidebar.style.width = "";
+                sidebar.style.zIndex = "";
+
+                wrapper.style.height = "auto";
+
+                return;
+            }
+
+            const layoutBottom =
+                layout.offsetTop +
+                layout.offsetHeight;
+
+            const sidebarHeight =
+                sidebar.offsetHeight;
+
+            const stopPoint =
+                layoutBottom -
+                sidebarHeight -
+                40;
+
+            if (
+                window.scrollY >= startPosition &&
+                window.scrollY < stopPoint
+            ) {
+
+                const rect =
+                    wrapper.getBoundingClientRect();
+
+                wrapper.style.height =
+                    sidebarHeight + "px";
+
+                sidebar.style.position = "fixed";
+                sidebar.style.top = "90px";
+                sidebar.style.left =
+                    rect.left + "px";
+                sidebar.style.width =
+                    rect.width + "px";
+                sidebar.style.zIndex = "999";
+
+            } else {
+
+                wrapper.style.height =
+                    "auto";
+
+                sidebar.style.position = "";
+                sidebar.style.top = "";
+                sidebar.style.left = "";
+                sidebar.style.width = "";
+                sidebar.style.zIndex = "";
+
+            }
+
+        };
+
+        handleSticky();
+
+        window.addEventListener(
+            "scroll",
+            handleSticky
+        );
+
+        window.addEventListener(
+            "resize",
+            handleSticky
+        );
+
+        return () => {
+
+            window.removeEventListener(
+                "scroll",
+                handleSticky
+            );
+
+            window.removeEventListener(
+                "resize",
+                handleSticky
+            );
+
+        };
+
+    }, [loading]);
+
     const scrollToTop = () => {
 
         window.scrollTo({
@@ -459,107 +567,114 @@ export default function ItemPage() {
             </div>
             <div className="products-layout">
 
-                <aside className="products-sidebar">
+                <div
+                    id="sidebarWrapper"
+                    style={{
+                        minHeight: "500px"
+                    }}
+                >
 
-                    <h3 className="sidebar-title">
+                    <aside className="products-sidebar">
 
-                        Categories
+                        <h3 className="sidebar-title">
 
-                    </h3>
+                            Categories
 
-                    <div className="accordion-wrapper">
+                        </h3>
 
-                        {groupedProducts.map(
-                            ([category, items]) => (
+                        <div className="accordion-wrapper">
 
-                                <div
-                                    className="accordion-item"
-                                    key={category}
-                                >
-
-                                    <button
-                                        className={`accordion-header ${activeCategory === category
-                                            ? "active"
-                                            : ""
-                                            }`}
-                                        onClick={() =>
-                                            toggleCategory(
-                                                category
-                                            )
-                                        }
-                                    >
-
-                                        <span className="accordion-left">
-
-                                            {openedCategory ===
-                                                category ? (
-                                                <ChevronDown
-                                                    size={18}
-                                                />
-                                            ) : (
-                                                <ChevronRight
-                                                    size={18}
-                                                />
-                                            )}
-
-                                            {category}
-
-                                        </span>
-
-                                        <span className="accordion-count">
-
-                                            {items.length}
-
-                                        </span>
-
-                                    </button>
+                            {groupedProducts.map(
+                                ([category, items]) => (
 
                                     <div
-                                        className={`accordion-content ${openedCategory ===
-                                            category
-                                            ? "open"
-                                            : ""
-                                            }`}
+                                        className="accordion-item"
+                                        key={category}
                                     >
 
-                                        {items.map(
-                                            (
-                                                product
-                                            ) => (
+                                        <button
+                                            className={`accordion-header ${activeCategory === category
+                                                ? "active"
+                                                : ""
+                                                }`}
+                                            onClick={() =>
+                                                toggleCategory(
+                                                    category
+                                                )
+                                            }
+                                        >
 
-                                                <button
-                                                    key={
-                                                        product.uid
-                                                    }
-                                                    className="accordion-link"
-                                                    onClick={() =>
-                                                        scrollToProduct(
-                                                            product.slug,
-                                                            category
-                                                        )
-                                                    }
-                                                >
+                                            <span className="accordion-left">
 
-                                                    {
-                                                        product.title
-                                                    }
+                                                {openedCategory ===
+                                                    category ? (
+                                                    <ChevronDown
+                                                        size={18}
+                                                    />
+                                                ) : (
+                                                    <ChevronRight
+                                                        size={18}
+                                                    />
+                                                )}
 
-                                                </button>
+                                                {category}
 
-                                            )
-                                        )}
+                                            </span>
+
+                                            <span className="accordion-count">
+
+                                                {items.length}
+
+                                            </span>
+
+                                        </button>
+
+                                        <div
+                                            className={`accordion-content ${openedCategory ===
+                                                category
+                                                ? "open"
+                                                : ""
+                                                }`}
+                                        >
+
+                                            {items.map(
+                                                (
+                                                    product
+                                                ) => (
+
+                                                    <button
+                                                        key={
+                                                            product.uid
+                                                        }
+                                                        className="accordion-link"
+                                                        onClick={() =>
+                                                            scrollToProduct(
+                                                                product.slug,
+                                                                category
+                                                            )
+                                                        }
+                                                    >
+
+                                                        {
+                                                            product.title
+                                                        }
+
+                                                    </button>
+
+                                                )
+                                            )}
+
+                                        </div>
 
                                     </div>
 
-                                </div>
+                                )
+                            )}
 
-                            )
-                        )}
+                        </div>
 
-                    </div>
-
-                </aside>
-
+                    </aside>
+                </div>
                 {/* RIGHT SIDE */}
 
                 <div className="products-right">
@@ -751,19 +866,21 @@ export default function ItemPage() {
                 </div>
 
             </div>
-            {showTopButton && (
+            {
+                showTopButton && (
 
-                <button
-                    onClick={scrollToTop}
-                    className="back-to-top"
-                >
+                    <button
+                        onClick={scrollToTop}
+                        className="back-to-top"
+                    >
 
-                    <ChevronUp size={24} />
+                        <ChevronUp size={24} />
 
-                </button>
+                    </button>
 
-            )}
-        </main>
+                )
+            }
+        </main >
 
     );
 
