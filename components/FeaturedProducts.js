@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import "./FeaturedProducts.css";
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import Link from "next/link";
 
@@ -31,33 +31,88 @@ export default function FeaturedProducts() {
             : "";
 
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const snap = await getDoc(
-                    doc(
-                        db,
-                        "websites",
-                        "humanbiomedicalsin",
-                        "pages",
-                        "products"
-                    )
-                );
+        // const fetchProducts = async () => {
+        //     try {
+        //         const snap = await getDoc(
+        //             doc(
+        //                 db,
+        //                 "websites",
+        //                 "humanbiomedicalsin",
+        //                 "pages",
+        //                 "products"
+        //             )
+        //         );
 
-                if (snap.exists()) {
-                    const allProducts =
-                        snap.data().products || [];
+        //         if (snap.exists()) {
+        //             const allProducts =
+        //                 snap.data().products || [];
 
-                    setProducts(
-                        allProducts.slice(0, 4)
-                    );
+        //             setProducts(
+        //                 allProducts.slice(0, 4)
+        //             );
+        //         }
+        //     } catch (error) {
+        //         console.error(error);
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
+
+const fetchProducts = async () => {
+    try {
+        // Categories
+        const categorySnap = await getDocs(
+            collection(
+                db,
+                "websites",
+                "humanbiomedicalsin",
+                "pages",
+                "categoryproducts",
+                "categories"
+            )
+        );
+
+        let allProducts = [];
+
+        // Har category ke andar jao
+        for (const categoryDoc of categorySnap.docs) {
+
+            const subCategorySnap = await getDocs(
+                collection(
+                    db,
+                    "websites",
+                    "humanbiomedicalsin",
+                    "pages",
+                    "categoryproducts",
+                    "categories",
+                    categoryDoc.id,
+                    "subcategories"
+                )
+            );
+
+            // Har subcategory ke products nikalo
+            subCategorySnap.forEach((subDoc) => {
+
+                const data = subDoc.data();
+
+                if (Array.isArray(data.products)) {
+                    allProducts.push(...data.products);
                 }
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
 
+            });
+        }
+
+        console.log("Products:", allProducts);
+
+        setProducts(allProducts.slice(0, 4));
+
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setLoading(false);
+    }
+};
+        
         fetchProducts();
     }, []);
 
@@ -110,8 +165,9 @@ export default function FeaturedProducts() {
                     >
                         <div className="product-image">
                             <img
-                                src={
+                             src={
                                     product.image ||
+                                    product.images?.[0] ||
                                     "/placeholder-product.jpg"
                                 }
                                 alt={product.title}
