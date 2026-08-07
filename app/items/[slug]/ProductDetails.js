@@ -6,8 +6,9 @@ import { useState, useEffect } from "react";
 import { doc, getDocs, getDoc, addDoc, collection } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import toast from "react-hot-toast";
-import { FaPlay } from "react-icons/fa";
+import { FaPlay, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 import Image from "next/image";
+import BrochureGenerator from "../../../components/BrochureGenerator";
 
 export default function ProductDetails({ initialProduct, district: propDistrict, city: propCity }) {
     const { slug } = useParams();
@@ -449,6 +450,55 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             <span>{product.title}</span>
                         </div>
                     </div>
+
+                    {/* BROCHURE PDF DOWNLOAD BUTTON */}
+                    <BrochureGenerator product={product} selectedImage={selectedImage} />
+
+                    {/* QUICK CONTACT ACTION BUTTONS */}
+                    <div style={{ display: "flex", gap: "10px", marginTop: "15px", flexWrap: "wrap" }}>
+                        <a
+                            href="tel:+919251598228"
+                            style={{
+                                flex: 1,
+                                minWidth: "160px",
+                                background: "#0f4c81",
+                                color: "#ffffff",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                textDecoration: "none",
+                                fontWeight: "700",
+                                fontSize: "14px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "8px"
+                            }}
+                        >
+                            <FaPhoneAlt /> Call +91 9251598228
+                        </a>
+                        <a
+                            href={`https://wa.me/919251598228?text=Hello%20Human%20Biomedical%20LLP,%20I%20am%20interested%20in%20${encodeURIComponent(product.title)}.`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                flex: 1,
+                                minWidth: "160px",
+                                background: "#25d366",
+                                color: "#ffffff",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                textDecoration: "none",
+                                fontWeight: "700",
+                                fontSize: "14px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "8px"
+                            }}
+                        >
+                            <FaWhatsapp /> WhatsApp Inquiry
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -465,6 +515,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={submitting}
+                            suppressHydrationWarning
                         />
                         {errors.name && (
                             <span className="error-text">
@@ -478,6 +529,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             value={phone}
                             maxLength={10}
                             disabled={submitting}
+                            suppressHydrationWarning
                             onChange={(e) =>
                                 setPhone(
                                     e.target.value.replace(/[^0-9]/g, "")
@@ -496,6 +548,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={submitting}
+                            suppressHydrationWarning
                         />
                         {errors.email && (
                             <span className="error-text">
@@ -509,6 +562,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             disabled={submitting}
+                            suppressHydrationWarning
                         />
                         {errors.message && (
                             <span className="error-text">
@@ -520,6 +574,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             type="submit"
                             className="submit-btn"
                             disabled={submitting}
+                            suppressHydrationWarning
                         >
                             {submitting ? "Sending..." : "Send Enquiry"}
                         </button>

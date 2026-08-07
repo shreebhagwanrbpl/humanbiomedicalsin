@@ -80,23 +80,17 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
         }
     };
 
-    const contactPhone =
-        contactInfo.find(
-            item =>
-                item.label.toLowerCase() === "phone"
-        )?.value || "";
-
     const contactEmail =
         contactInfo.find(
             item =>
                 item.label.toLowerCase() === "email"
-        )?.value || "";
+        )?.value || "humanbiomedicalsin@gmail.com";
 
     const address =
         contactInfo.find(
             item =>
                 item.label.toLowerCase() === "address"
-        )?.value || "";
+        )?.value || "Jaipur, Rajasthan, India";
 
     const displayAddress =
         !district ||
@@ -108,7 +102,7 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
         <main className="contact-page">
             {/* Hero */}
             <section className="contact-hero">
-                <span className="contact-badge"> Contact Human Biomedical </span>
+                <span className="contact-badge"> Contact Human Biomedical LLP </span>
                 <h1>
                     Let's Discuss Your Biomedical Requirements
                     {city && (
@@ -137,12 +131,23 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                             {city && ` in ${city}`}.
                         </p>
                         <div className="info-card">
-                            <h3>📞 Phone</h3>
-                            <p>{contactPhone}</p>
+                            <h3>📞 Phone Numbers</h3>
+                            <p style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <a href="tel:+919251598228" style={{ color: "#0f4c81", fontWeight: "600", textDecoration: "none" }}>
+                                    +91 9251598228
+                                </a>
+                                <a href="tel:+918112279728" style={{ color: "#0f4c81", fontWeight: "600", textDecoration: "none" }}>
+                                    +91 8112279728
+                                </a>
+                            </p>
                         </div>
                         <div className="info-card">
-                            <h3>📧 Email</h3>
-                            <p>{contactEmail}</p>
+                            <h3>📧 Email Address</h3>
+                            <p>
+                                <a href={`mailto:${contactEmail}`} style={{ color: "inherit", textDecoration: "none" }}>
+                                    {contactEmail}
+                                </a>
+                            </p>
                         </div>
                         <div className="info-card">
                             <h3>📍 Address</h3>
@@ -163,6 +168,7 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 disabled={submitting}
+                                suppressHydrationWarning
                             />
                             {errors.name && (
                                 <span className="error-text">
@@ -176,6 +182,7 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={submitting}
+                                suppressHydrationWarning
                             />
                             {errors.email && (
                                 <span className="error-text">
@@ -189,6 +196,7 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                                 value={phone}
                                 maxLength={10}
                                 inputMode="numeric"
+                                suppressHydrationWarning
                                 onChange={(e) =>
                                     setPhone(
                                         e.target.value.replace(/[^0-9]/g, "")
@@ -208,6 +216,7 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 disabled={submitting}
+                                suppressHydrationWarning
                             />
                             {errors.message && (
                                 <span className="error-text">
@@ -215,7 +224,7 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                                 </span>
                             )}
 
-                            <button type="submit" disabled={submitting}>
+                            <button type="submit" disabled={submitting} suppressHydrationWarning>
                                 {submitting ? "Sending..." : "Send Enquiry"}
                             </button>
                         </form>

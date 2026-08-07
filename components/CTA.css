@@ -51,45 +51,78 @@
 .cta-buttons {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
+}
+
+.cta-call-btn {
+    background: #e08c2a;
+    color: white;
+    padding: 16px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(224, 140, 42, 0.3);
+}
+
+.cta-call-btn:hover {
+    background: #c7771e;
+    color: white;
+    transform: translateY(-3px);
+}
+
+.cta-whatsapp-btn {
+    background: #25d366;
+    color: white;
+    padding: 16px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.cta-whatsapp-btn:hover {
+    background: #1eb956;
+    color: white;
+    transform: translateY(-3px);
 }
 
 .cta-primary {
     background: #0f4c81;
     color: white;
-
-    border: none;
-
     padding: 16px 32px;
     border-radius: 10px;
-
     font-size: 16px;
     font-weight: 600;
-
-    cursor: pointer;
-
+    text-decoration: none;
     transition: 0.3s;
 }
 
 .cta-primary:hover {
     background: #0b3c5d;
+    color: white;
 }
 
 .cta-secondary {
     background: white;
-
     color: #0f4c81;
-
     border: 2px solid #0f4c81;
-
     padding: 16px 32px;
     border-radius: 10px;
-
     font-size: 16px;
     font-weight: 600;
-
-    cursor: pointer;
-
+    text-decoration: none;
     transition: 0.3s;
 }
 

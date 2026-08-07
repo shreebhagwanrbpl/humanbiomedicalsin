@@ -1,0 +1,366 @@
+/* ==========================================
+   BROCHURE DOWNLOAD BUTTON STYLES
+========================================== */
+
+.brochure-download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #1b4965, #0f4c81);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(27, 73, 101, 0.3);
+    margin-top: 15px;
+    width: 100%;
+}
+
+.brochure-download-btn:hover {
+    background: linear-gradient(135deg, #0f4c81, #092c48);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(27, 73, 101, 0.4);
+}
+
+.brochure-download-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.pdf-icon {
+    color: #f87171;
+    font-size: 18px;
+}
+
+.dl-icon {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.spin-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   OFFSCREEN PDF BROCHURE CANVAS TEMPLATE
+========================================== */
+
+.pdf-offscreen-container {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 800px;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.brochure-pdf-page {
+    width: 800px;
+    min-height: 1130px;
+    background: #ffffff;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #1e293b;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+/* DIAGONAL REPEATING WATERMARK */
+.watermark-overlay {
+    position: absolute;
+    top: -200px;
+    left: -200px;
+    width: 1200px;
+    height: 1500px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: space-around;
+    transform: rotate(-35deg);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.08;
+    overflow: hidden;
+}
+
+.watermark-text {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f4c81;
+    margin: 45px 55px;
+    white-space: nowrap;
+    letter-spacing: 2px;
+}
+
+/* HEADER BANNER */
+.brochure-header {
+    background: #1b4965;
+    color: #ffffff;
+    padding: 22px 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.header-left h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.header-right p {
+    margin: 3px 0;
+    font-size: 12px;
+    color: #e2e8f0;
+    text-align: right;
+}
+
+.header-gold-line {
+    height: 6px;
+    background: #e08c2a;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+/* BODY AREA */
+.brochure-body {
+    padding: 30px 40px;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+
+.product-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 16px 0;
+}
+
+.sub-ribbon {
+    background: #e08c2a;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* MIDDLE GRID */
+.middle-grid {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 25px;
+    align-items: stretch;
+}
+
+.product-image-card {
+    flex: 0 0 42%;
+    background: #f0fdfa;
+    border: 2px solid #7ad3cc;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.img-container {
+    width: 100%;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.specs-card {
+    flex: 1;
+    border: 2px solid #7ad3cc;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.specs-header {
+    background: #1b4965;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 16px;
+    letter-spacing: 0.5px;
+}
+
+.specs-table {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.spec-row {
+    display: flex;
+    padding: 9px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.spec-row:last-child {
+    border-bottom: none;
+}
+
+.spec-row.alt {
+    background: #eef6fc;
+}
+
+.spec-label {
+    width: 40%;
+    font-weight: 700;
+    color: #0f4c81;
+}
+
+.spec-value {
+    width: 60%;
+    color: #334155;
+}
+
+/* OVERVIEW SECTION */
+.overview-section {
+    margin-bottom: 25px;
+}
+
+.overview-section h3 {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f4c81;
+    margin: 0 0 4px 0;
+    letter-spacing: 0.5px;
+}
+
+.overview-underline {
+    height: 3px;
+    width: 160px;
+    background: #e08c2a;
+    margin-bottom: 10px;
+    border-radius: 2px;
+}
+
+.overview-section p {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #475569;
+    margin: 0;
+}
+
+/* BOTTOM CARDS */
+.bottom-cards-grid {
+    display: flex;
+    gap: 20px;
+}
+
+.info-box {
+    flex: 1;
+    background: #f8fafc;
+    border: 2px solid #7ad3cc;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.box-header {
+    background: #1b4965;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 15px;
+    letter-spacing: 0.5px;
+}
+
+.box-bullets {
+    list-style: none;
+    padding: 12px 16px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.box-bullets li {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.box-bullets li span {
+    font-size: 10px;
+}
+
+/* FOOTER BANNER */
+.footer-gold-line {
+    height: 4px;
+    background: #e08c2a;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+.brochure-footer {
+    background: #1b4965;
+    color: #ffffff;
+    padding: 14px 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.company-name {
+    font-size: 12px;
+    font-weight: 800;
+    margin: 0 0 2px 0;
+}
+
+.company-tagline {
+    font-size: 10.5px;
+    color: #cbd5e1;
+    margin: 0;
+}
+
+.footer-right p {
+    font-size: 10.5px;
+    color: #cbd5e1;
+    margin: 0;
+    text-align: right;
+}
