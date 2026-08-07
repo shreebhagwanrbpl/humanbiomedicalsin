@@ -1,131 +1,18 @@
-"use client";
 import "./Services.css";
-import { usePathname } from "next/navigation";
-import "./Services.css";
-import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../lib/firebase";
-export default function ServicesPage() {
-    const [services, setServices] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const pathname = usePathname();
+import Link from "next/link";
+import { getServicesData } from "../../lib/db-server";
 
-    const pathParts = pathname
-        .split("/")
-        .filter(Boolean);
+export const revalidate = 3600;
 
-    const staticRoutes = [
-        "about",
-        "items",
-        "services",
-        "contact"
-    ];
-
-    const district =
-        pathParts[0] &&
-            !staticRoutes.includes(pathParts[0])
-            ? pathParts[0]
-            : "";
+export default async function ServicesPage({ district = "" }) {
+    const services = await getServicesData();
 
     const city = district
         ? district
             .replace(/-/g, " ")
             .replace(/\b\w/g, c => c.toUpperCase())
         : "";
-    useEffect(() => {
-        const fetchServices = async () => {
-            try {
-                const snap = await getDoc(
-                    doc(
-                        db,
-                        "websites",
-                        "humanbiomedicalsin",
-                        "pages",
-                        "services"
-                    )
-                );
 
-                if (snap.exists()) {
-                    setServices(
-                        snap.data().services || []
-                    );
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchServices();
-    }, []);
-
-    if (loading) {
-        return (
-            <main className="services-page">
-
-                <section className="services-hero">
-
-                    <div className="hero-content">
-
-                        <div className="skeleton badge-loader"></div>
-
-                        <div className="skeleton hero-title-loader"></div>
-
-                        <div className="skeleton hero-title-loader short"></div>
-
-                        <div className="skeleton hero-text-loader"></div>
-                        <div className="skeleton hero-text-loader"></div>
-                        <div className="skeleton hero-text-loader small"></div>
-                        {/* 
-                        <div className="hero-buttons">
-
-                            <div className="skeleton btn-loader"></div>
-
-                            <div className="skeleton btn-loader"></div>
-
-                        </div> */}
-
-                    </div>
-
-                </section>
-
-                <section className="services-section">
-
-                    <div className="section-title">
-
-                        <div className="skeleton section-heading-loader"></div>
-
-                        <div className="skeleton section-text-loader"></div>
-
-                    </div>
-
-                    <div className="services-grid">
-
-                        {[1, 2, 3, 4, 5, 6].map((item) => (
-                            <div
-                                className="service-card"
-                                key={item}
-                            >
-
-                                <div className="skeleton icon-loader"></div>
-
-                                <div className="skeleton card-title-loader"></div>
-
-                                <div className="skeleton card-text-loader"></div>
-
-                                <div className="skeleton card-text-loader short"></div>
-
-                            </div>
-                        ))}
-
-                    </div>
-
-                </section>
-
-            </main>
-        );
-    }
     return (
         <main className="services-page">
 
@@ -163,39 +50,9 @@ export default function ServicesPage() {
                             : " across India."}
                     </p>
 
-                    {/* <div className="hero-buttons">
-                        <button
-                            className="primary-btn"
-                            onClick={() =>
-                                window.location.href =
-                                district
-                                    ? `/${district}/contact`
-                                    : "/contact"
-                            }
-                        >
-                            Request Service
-                        </button>
-
-
-                        <button
-                            className="secondary-btn"
-                            onClick={() =>
-                                window.location.href =
-                                district
-                                    ? `/${district}/contact`
-                                    : "/contact"
-                            }
-                        >
-                            Contact Team
-                        </button>
-                    </div> */}
-
                 </div>
 
             </section>
-
-            {/* STATS */}
-
 
             {/* SERVICES */}
 
@@ -344,20 +201,19 @@ export default function ServicesPage() {
                     calibration, repair and AMC services.
                 </p>
 
-                <button
+                <Link
                     className="secondary-btn"
-                    onClick={() =>
-                        window.location.href =
+                    href={
                         district
                             ? `/${district}/contact`
                             : "/contact"
                     }
                 >
                     Get Free Consultation
-                </button>
+                </Link>
 
             </section>
 
         </main >
     );
-}
+}

@@ -23,6 +23,9 @@ export async function generateMetadata({
   };
 }
 
-export default function DistrictItemsPage() {
-  return <ItemsPage />;
+export const revalidate = 3600;
+
+export default async function DistrictItemsPage({ params }) {
+  const { district } = await params;
+  return <ItemsPage district={district} />;
 }

@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import Link from "next/link";
+import Image from "next/image";
 
-export default function FeaturedProducts() {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+export default function FeaturedProducts({ products: initialProducts, district: propDistrict }) {
+    const [products, setProducts] = useState(initialProducts || []);
+    const [loading, setLoading] = useState(!initialProducts);
 
     const pathname = usePathname();
 
@@ -24,13 +25,17 @@ export default function FeaturedProducts() {
         "contact",
     ];
 
-    const district =
+    const clientDistrict =
         pathParts[0] &&
             !staticRoutes.includes(pathParts[0])
             ? pathParts[0]
             : "";
 
+    const district = propDistrict !== undefined ? propDistrict : clientDistrict;
+
     useEffect(() => {
+        if (initialProducts) return;
+
         const fetchProducts = async () => {
             try {
                 const snap = await getDoc(
@@ -59,7 +64,7 @@ export default function FeaturedProducts() {
         };
 
         fetchProducts();
-    }, []);
+    }, [initialProducts]);
 
     if (loading) {
         return (
@@ -108,13 +113,16 @@ export default function FeaturedProducts() {
                         className="product-card"
                         key={`${product.slug || product.id || "product"}-${index}`}
                     >
-                        <div className="product-image">
-                            <img
+                        <div className="product-image" style={{ position: "relative", width: "100%", height: "240px" }}>
+                            <Image
                                 src={
                                     product.image ||
                                     "/placeholder-product.jpg"
                                 }
                                 alt={product.title}
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                                style={{ objectFit: "contain" }}
                                 loading="lazy"
                             />
                         </div>
@@ -167,4 +175,4 @@ export default function FeaturedProducts() {
             </div>
         </section>
     );
-}
+}

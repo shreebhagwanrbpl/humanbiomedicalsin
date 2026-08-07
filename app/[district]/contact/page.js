@@ -14,6 +14,9 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function DistrictContactPage() {
-  return <ContactPage />;
+export const revalidate = 3600;
+
+export default async function DistrictContactPage({ params }) {
+  const { district } = await params;
+  return <ContactPage district={district} />;
 }

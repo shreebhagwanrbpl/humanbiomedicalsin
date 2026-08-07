@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { doc } from "firebase/firestore";
+import { db, getCachedDoc } from "../lib/firebase";
 export default function Footer() {
     const [contactInfo, setContactInfo] = useState([]);
     const [districtData, setDistrictData] = useState(null);
@@ -42,7 +42,7 @@ export default function Footer() {
 
             try {
 
-                const contactSnap = await getDoc(
+                const contactSnap = await getCachedDoc(
                     doc(
                         db,
                         "websites",
@@ -63,7 +63,7 @@ export default function Footer() {
                     district.toLowerCase() !== "jaipur"
                 ) {
 
-                    const districtSnap = await getDoc(
+                    const districtSnap = await getCachedDoc(
                         doc(
                             db,
                             "websites",
