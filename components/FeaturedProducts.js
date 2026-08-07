@@ -3,14 +3,13 @@
 import { usePathname } from "next/navigation";
 import "./FeaturedProducts.css";
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import Link from "next/link";
-import Image from "next/image";
 
-export default function FeaturedProducts({ products: initialProducts, district: propDistrict }) {
-    const [products, setProducts] = useState(initialProducts || []);
-    const [loading, setLoading] = useState(!initialProducts);
+export default function FeaturedProducts() {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const pathname = usePathname();
 
@@ -25,37 +24,88 @@ export default function FeaturedProducts({ products: initialProducts, district: 
         "contact",
     ];
 
-    const clientDistrict =
+    const district =
         pathParts[0] &&
             !staticRoutes.includes(pathParts[0])
             ? pathParts[0]
             : "";
 
-    const district = propDistrict !== undefined ? propDistrict : clientDistrict;
-
     useEffect(() => {
-        if (initialProducts) return;
+        // const fetchProducts = async () => {
+        //     try {
+        //         const snap = await getDoc(
+        //             doc(
+        //                 db,
+        //                 "websites",
+        //                 "humanbiomedicalsin",
+        //                 "pages",
+        //                 "products"
+        //             )
+        //         );
+
+        //         if (snap.exists()) {
+        //             const allProducts =
+        //                 snap.data().products || [];
+
+        //             setProducts(
+        //                 allProducts.slice(0, 4)
+        //             );
+        //         }
+        //     } catch (error) {
+        //         console.error(error);
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
 
         const fetchProducts = async () => {
             try {
-                const snap = await getDoc(
-                    doc(
+                // Categories
+                const categorySnap = await getDocs(
+                    collection(
                         db,
                         "websites",
                         "humanbiomedicalsin",
                         "pages",
-                        "products"
+                        "categoryproducts",
+                        "categories"
                     )
                 );
 
-                if (snap.exists()) {
-                    const allProducts =
-                        snap.data().products || [];
+                let allProducts = [];
 
-                    setProducts(
-                        allProducts.slice(0, 4)
+                // Har category ke andar jao
+                for (const categoryDoc of categorySnap.docs) {
+
+                    const subCategorySnap = await getDocs(
+                        collection(
+                            db,
+                            "websites",
+                            "humanbiomedicalsin",
+                            "pages",
+                            "categoryproducts",
+                            "categories",
+                            categoryDoc.id,
+                            "subcategories"
+                        )
                     );
+
+                    // Har subcategory ke products nikalo
+                    subCategorySnap.forEach((subDoc) => {
+
+                        const data = subDoc.data();
+
+                        if (Array.isArray(data.products)) {
+                            allProducts.push(...data.products);
+                        }
+
+                    });
                 }
+
+                console.log("Products:", allProducts);
+
+                setProducts(allProducts.slice(0, 4));
+
             } catch (error) {
                 console.error(error);
             } finally {
@@ -64,7 +114,7 @@ export default function FeaturedProducts({ products: initialProducts, district: 
         };
 
         fetchProducts();
-    }, [initialProducts]);
+    }, []);
 
     if (loading) {
         return (
@@ -113,16 +163,14 @@ export default function FeaturedProducts({ products: initialProducts, district: 
                         className="product-card"
                         key={`${product.slug || product.id || "product"}-${index}`}
                     >
-                        <div className="product-image" style={{ position: "relative", width: "100%", height: "240px" }}>
-                            <Image
+                        <div className="product-image">
+                            <img
                                 src={
                                     product.image ||
+                                    product.images?.[0] ||
                                     "/placeholder-product.jpg"
                                 }
                                 alt={product.title}
-                                fill
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                style={{ objectFit: "contain" }}
                                 loading="lazy"
                             />
                         </div>
@@ -175,4 +223,4 @@ export default function FeaturedProducts({ products: initialProducts, district: 
             </div>
         </section>
     );
-}
+}
