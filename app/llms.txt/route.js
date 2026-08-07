@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 
+export const dynamic = "force-dynamic";
+
 const WEBSITE = "humanbiomedicalsin";
 const DOMAIN = "https://humanbiomedicals.in";
 
 export async function GET() {
     try {
+        if (!adminDb) {
+            return new NextResponse("Firebase Admin environment variables missing", { status: 503 });
+        }
+
         // Districts
         const districtSnap = await adminDb
             .collection("websites")
