@@ -3,11 +3,17 @@ import { fetchFullCatalog, getDistrictData } from "@/lib/db-server";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
+export const dynamic = "force-dynamic";
+
 const WEBSITE = "humanbiomedicalsin";
 const DOMAIN = "https://humanbiomedicals.in";
 
 export async function GET() {
     try {
+        if (!adminDb) {
+            return new NextResponse("Firebase Admin environment variables missing", { status: 503 });
+        }
+
         // Districts
         let districts = [];
         try {
