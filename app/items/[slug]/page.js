@@ -1,34 +1,36 @@
 import ProductDetails from "./ProductDetails";
-import { getProductBySlug, getProductsData, getCategoriesData } from "../../../lib/db-server";
-import { cache } from "react";
+import { getProductBySlug, fetchFullCatalog } from "@/lib/db-server";
 import { notFound } from "next/navigation";
 
-// Pre-render product pages at build time
+// Pre-render product pages at build time across master catalog and categories
 export async function generateStaticParams() {
-    const otherProducts = await getProductsData();
-    return otherProducts.map((p) => ({
-        slug: p.slug,
-    }));
+    try {
+        const data = await fetchFullCatalog();
+        return (data.categoryProducts || []).map((p) => ({
+            slug: p.slug,
+        }));
+    } catch (e) {
+        return [];
+    }
 }
-
-// Request-scoped cache to deduplicate data fetching during SSR
-const getProductCached = cache(async (slug) => {
-    return getProductBySlug(slug);
-});
 
 export async function generateMetadata({ params }) {
     const { slug } = await params;
-    const product = await getProductCached(slug);
+    const product = await getProductBySlug(slug);
 
     if (!product) {
         return {
             title: "Product Not Found | Human Biomedicals",
             description: "The requested biomedical product could not be found.",
+            robots: {
+                index: false,
+                follow: false,
+            },
         };
     }
 
     const title = `${product.title} Supplier in India | Human Biomedicals`;
-    const description = `${product.title} from Human Biomedicals. ${product.desc || "Trusted supplier of biomedical equipment."}`;
+    const description = `${product.title} from Human Biomedicals. ${product.desc || "Trusted supplier of biomedical, pathology and laboratory equipment."}`;
     const url = `https://humanbiomedicals.in/items/${slug}`;
 
     return {
@@ -36,6 +38,8 @@ export async function generateMetadata({ params }) {
         description,
         keywords: [
             product.title,
+            product.brand,
+            product.model,
             `${product.title} Supplier`,
             `${product.title} Dealer`,
             `${product.title} Price`,
@@ -43,7 +47,7 @@ export async function generateMetadata({ params }) {
             "Laboratory Equipment",
             "Medical Equipment Supplier",
             "Human Biomedicals",
-        ],
+        ].filter(Boolean),
         alternates: {
             canonical: url,
         },
@@ -54,11 +58,13 @@ export async function generateMetadata({ params }) {
             siteName: "Human Biomedicals",
             locale: "en_IN",
             type: "website",
+            images: product.images?.[0] ? [{ url: product.images[0] }] : [],
         },
         twitter: {
             card: "summary_large_image",
             title,
             description,
+            images: product.images?.[0] ? [product.images[0]] : [],
         },
         robots: {
             index: true,
@@ -69,7 +75,7 @@ export async function generateMetadata({ params }) {
 
 export default async function Page({ params }) {
     const { slug } = await params;
-    const product = await getProductCached(slug);
+    const product = await getProductBySlug(slug);
 
     if (!product) {
         notFound();
@@ -79,8 +85,9 @@ export default async function Page({ params }) {
         <ProductDetails
             initialProduct={product}
             district=""
-            city=""
+            city="India"
         />
     );
 }
+
 export const revalidate = 3600;

@@ -1,27 +1,25 @@
-import ProductDetails from "../../../items/[slug]/ProductDetails";
-import { getProductBySlug } from "../../../../lib/db-server";
-import { cache } from "react";
+import ProductDetails from "@/app/items/[slug]/ProductDetails";
+import { getProductBySlug } from "@/lib/db-server";
 import { notFound } from "next/navigation";
-
-// Request-scoped cache to deduplicate data fetching during SSR
-const getProductCached = cache(async (slug) => {
-    return getProductBySlug(slug);
-});
 
 export async function generateMetadata({ params }) {
     const { slug, district } = await params;
-    const product = await getProductCached(slug);
+    const product = await getProductBySlug(slug);
 
     const city = district
         ? district
             .replace(/-/g, " ")
-            .replace(/\b\w/g, c => c.toUpperCase())
-        : "";
+            .replace(/\b\w/g, (c) => c.toUpperCase())
+        : "India";
 
     if (!product) {
         return {
             title: "Product Not Found | Human Biomedicals",
             description: "The requested biomedical product could not be found.",
+            robots: {
+                index: false,
+                follow: false,
+            },
         };
     }
 
@@ -34,6 +32,8 @@ export async function generateMetadata({ params }) {
         description,
         keywords: [
             product.title,
+            product.brand,
+            product.model,
             `${product.title} Supplier in ${city}`,
             `${product.title} Dealer in ${city}`,
             `${product.title} Price`,
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }) {
             "Laboratory Equipment",
             "Medical Equipment Supplier",
             "Human Biomedicals",
-        ],
+        ].filter(Boolean),
         alternates: {
             canonical: url,
         },
@@ -52,11 +52,13 @@ export async function generateMetadata({ params }) {
             siteName: "Human Biomedicals",
             locale: "en_IN",
             type: "website",
+            images: product.images?.[0] ? [{ url: product.images[0] }] : [],
         },
         twitter: {
             card: "summary_large_image",
             title,
             description,
+            images: product.images?.[0] ? [product.images[0]] : [],
         },
         robots: {
             index: true,
@@ -67,7 +69,7 @@ export async function generateMetadata({ params }) {
 
 export default async function DistrictProductPage({ params }) {
     const { slug, district } = await params;
-    const product = await getProductCached(slug);
+    const product = await getProductBySlug(slug);
 
     if (!product) {
         notFound();
@@ -76,8 +78,8 @@ export default async function DistrictProductPage({ params }) {
     const city = district
         ? district
             .replace(/-/g, " ")
-            .replace(/\b\w/g, c => c.toUpperCase())
-        : "";
+            .replace(/\b\w/g, (c) => c.toUpperCase())
+        : "India";
 
     return (
         <ProductDetails
@@ -87,4 +89,5 @@ export default async function DistrictProductPage({ params }) {
         />
     );
 }
+
 export const revalidate = 3600;

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { fetchFullCatalog, getDistrictData } from "@/lib/db-server";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 const WEBSITE = "humanbiomedicalsin";
 const DOMAIN = "https://humanbiomedicals.in";
@@ -7,279 +9,126 @@ const DOMAIN = "https://humanbiomedicals.in";
 export async function GET() {
     try {
         // Districts
-        const districtSnap = await adminDb
-            .collection("websites")
-            .doc(WEBSITE)
-            .collection("districts")
-            .get();
+        let districts = [];
+        try {
+            const districtSnap = await getDocs(
+                collection(db, "websites", WEBSITE, "districts")
+            );
+            districts = districtSnap.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+        } catch (e) {
+            // fallback
+        }
 
-        const districts = districtSnap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+        // Master Catalog Products & Categories
+        const catalogData = await fetchFullCatalog();
+        const publishedProducts = catalogData.categoryProducts || [];
+        const categories = catalogData.categoryList || [];
 
-        // Products Document
-        const productDoc = await adminDb
-            .collection("websites")
-            .doc(WEBSITE)
-            .collection("pages")
-            .doc("products")
-            .get();
-
-        const productData = productDoc.exists ? productDoc.data() : {};
-
-        const products = productData.products || [];
-
-        // Categories
-        const categorySnap = await adminDb
-            .collection("websites")
-            .doc(WEBSITE)
-            .collection("pages")
-            .doc("categoryproducts")
-            .collection("categories")
-            .get();
-
-        const categories = categorySnap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-
-        // ===========================
-        // Published Products
-        // ===========================
-
-        const publishedProducts = products.filter(
-            (item) => item.isPublished === true
-        );
-
-        // ===========================
-        // Categories
-        // ===========================
-
+        // Categories formatted
         const categoryText =
             categories.length > 0
                 ? categories
                     .map((cat) => {
-
-                        const productList =
-                            (cat.products || [])
-                                .map((item) => `- ${item.title}`)
-                                .join("\n");
+                        const productList = (cat.subcategories || [])
+                            .flatMap((sub) => sub.products || [])
+                            .map((item) => `- ${item.title} (${item.brand || "Human Biomedicals"})`)
+                            .join("\n");
 
                         return `
-
-## ${cat.category}
-
-Category ID:
-${cat.id}
-
-Total Products:
-${cat.products?.length || 0}
-
-Products
-
+## ${cat.name || cat.category}
+Category ID: ${cat.id}
+Total Subcategories: ${cat.subcategories?.length || 0}
+Products:
 ${productList || "No Products"}
-
 `;
-
                     })
                     .join("\n")
                 : "No Categories Found";
 
-        // ===========================
-        // Products
-        // ===========================
-
+        // Products formatted with all specifications
         const productText =
             publishedProducts.length > 0
                 ? publishedProducts
                     .map((product) => {
-
                         return `
-
 # ${product.title}
-
-Category:
-${product.category || "N/A"}
-
-Brand:
-${product.brand || "N/A"}
-
-Model:
-${product.model || "N/A"}
-
-Description:
-${product.desc || "No description available"}
-
-Instrument:
-${product.instrument || "N/A"}
-
-Automation:
-${product.automation || "N/A"}
-
-Usage:
-${product.usage || "N/A"}
-
-Throughput:
-${product.throughput || "N/A"}
-
-Capacity:
-${product.capacity || "N/A"}
-
-Availability:
-${product.availability || "N/A"}
-
-Price:
-${product.price || "Contact for Price"}
-
-Product URL:
-
-${DOMAIN}/items/${product.slug || product.id}
-
-
-
-
-${[product.title, product.brand, product.category, product.model,
-                            product.instrument,
-                            product.automation,
-                            product.usage,
-                            ]
-                                .filter(Boolean)
-                                .join(", ")
-                            }
+Category: ${product.category || "N/A"}
+Subcategory: ${product.subCategory || "N/A"}
+Brand: ${product.brand || "Human Biomedicals"}
+Model: ${product.model || "N/A"}
+Instrument: ${product.instrument || "N/A"}
+Capacity: ${product.capacity || "N/A"}
+Throughput: ${product.throughput || "N/A"}
+Automation: ${product.automation || "N/A"}
+Usage: ${product.usage || "N/A"}
+Parameters: ${product.parameters || "N/A"}
+Availability: ${product.availability || "In Stock"}
+Price: ${product.price ? `₹${product.price}` : "Contact for Best Quote"}
+Description: ${product.desc || product.description || "High performance biomedical equipment"}
+Product URL: ${DOMAIN}/items/${product.slug}
 `;
                     })
                     .join("\n")
                 : "No Products Found";
 
-
-        // ===========================
-        // Districts
-        // ===========================
-
+        // Districts formatted
         const districtText =
             districts.length > 0
                 ? districts
-                    .map(
-                        (item) =>
-                            `${DOMAIN}/${item.slug}`
-                    )
+                    .map((item) => `${DOMAIN}/${item.slug}`)
                     .join("\n")
                 : "No Districts Found";
 
-        // ===========================
-        // llms.txt
-        // ===========================
-
         const content = `
 ## Statistics
+Total Products: ${publishedProducts.length}
+Total Categories: ${categories.length}
+Total District Pages: ${districts.length}
 
-Products:
-${publishedProducts.length}
+# Human Biomedicals
+India's Premier Biomedical & Laboratory Equipment Supplier
+Website: ${DOMAIN}
 
-Categories:
-${categories.length}
+Company Overview:
+Human Biomedicals is one of India's trusted suppliers and manufacturers of biomedical equipment, pathology instruments, hematology analyzers, biochemistry analyzers, and medical consumables.
 
-Districts:
-${districts.length}
-# Human Biomedical
-
-India's Trusted Biomedical Equipment Company
-
-Website
-
-${DOMAIN}
-
-Published Products
-
-${publishedProducts.length}
-
-Categories
-
-${categories.length}
-
-District Pages
-
-${districts.length}
-Company
-
-Human Biomedical is one of India's trusted Biomedical Equipment suppliers.
-
-Services
-
+Services:
 - Biomedical Equipment Supply
 - Laboratory Equipment
 - Diagnostic Equipment
-- Installation
-- AMC
-- Calibration
-- Repair
-- Technical Support
+- Installation & AMC Support
+- Calibration & Repair
 - Pan India Delivery
 
-Search Keywords
+Search Keywords:
+Biomedical Equipment, Laboratory Analyzers, Hematology Analyzer, Biochemistry Analyzer, Electrolyte Analyzer, Urine Analyzer, Pathology Equipment, Medical Diagnostics India
 
-Biomedical Equipment
-
-Laboratory Equipment
-
-Diagnostic Equipment
-
-Hospital Equipment
-
-Medical Equipment
-
-ICU Equipment
-
-Operation Theatre Equipment
-
-Biochemistry Analyzer
-
-Electrolyte Analyzer
-
-CLIA Analyzer
-
-Immunoassay Analyzer
 ------------------------------------------------
-
 ## Categories
-
 ${categoryText}
 
 ------------------------------------------------
-
 ## Products
-
 ${productText}
 
 ------------------------------------------------
-
 ## District Pages
-
 ${districtText}
 
 ------------------------------------------------
-
-Sitemap
-
-${DOMAIN}/sitemap.xml
-
-Robots
-
-${DOMAIN}/robots.txt
-
-Contact
-
-${DOMAIN}/contact
-Last Updated
-
-${new Date().toISOString()}
-
+Sitemap: ${DOMAIN}/sitemap.xml
+Robots: ${DOMAIN}/robots.txt
+Contact: ${DOMAIN}/contact
+Last Updated: ${new Date().toISOString()}
 `;
+
         return new NextResponse(content, {
             headers: {
                 "Content-Type": "text/plain; charset=utf-8",
-                "Cache-Control": "public,max-age=3600",
+                "Cache-Control": "public, max-age=3600",
             },
         });
     } catch (e) {
@@ -293,5 +142,4 @@ ${new Date().toISOString()}
             }
         );
     }
-
 }

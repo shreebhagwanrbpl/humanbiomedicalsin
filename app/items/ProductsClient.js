@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronRight, Search, Eye, Layers } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -11,6 +11,8 @@ export default function ProductsClient({
     city = "",
     district = "",
 }) {
+    const [categories, setCategories] = useState(initialCategories);
+    const [products, setProducts] = useState(initialProducts);
     const [search, setSearch] = useState("");
     const [openedCategories, setOpenedCategories] = useState({});
     const [openedSubcategories, setOpenedSubcategories] = useState({});
@@ -19,6 +21,45 @@ export default function ProductsClient({
     const [pendingScroll, setPendingScroll] = useState(null);
     const [showTopButton, setShowTopButton] = useState(false);
     const [visibleCount, setVisibleCount] = useState(30);
+
+    // Live auto-sync with /api/products on window focus or visibility change
+    useEffect(() => {
+        let isMounted = true;
+
+        const syncLiveCatalog = async () => {
+            try {
+                const res = await fetch("/api/products", { cache: "no-store" });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (isMounted && data.success) {
+                        setCategories(data.categories || []);
+                        setProducts(data.products || []);
+                    }
+                }
+            } catch (err) {
+                // Silently ignore background sync errors
+            }
+        };
+
+        const handleVisibilityOrFocus = () => {
+            if (document.visibilityState === "visible") {
+                syncLiveCatalog();
+            }
+        };
+
+        window.addEventListener("focus", handleVisibilityOrFocus);
+        document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+        // Periodic background poll every 30 seconds
+        const pollInterval = setInterval(syncLiveCatalog, 30000);
+
+        return () => {
+            isMounted = false;
+            window.removeEventListener("focus", handleVisibilityOrFocus);
+            document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+            clearInterval(pollInterval);
+        };
+    }, []);
 
     // Update navbar height dynamically in a CSS variable to stack sticky components correctly
     useEffect(() => {
@@ -37,32 +78,39 @@ export default function ProductsClient({
     // Filter products based on search term and rebuild tree
     const filteredCategories = useMemo(() => {
         const query = search.toLowerCase().trim();
-        if (!query) return initialCategories;
+        if (!query) return categories;
 
-        return initialCategories.map(cat => {
-            const filteredSubs = (cat.subcategories || []).map(sub => {
-                const filteredProducts = (sub.products || []).filter(p => {
-                    const text = `
-                        ${p.title || ""}
-                        ${p.brand || ""}
-                        ${p.model || ""}
-                        ${p.category || ""}
-                        ${p.subCategory || ""}
-                    `.toLowerCase();
-                    return text.includes(query);
-                });
-                return { ...sub, products: filteredProducts };
-            }).filter(sub => sub.products.length > 0);
+        return categories
+            .map((cat) => {
+                const filteredSubs = (cat.subcategories || [])
+                    .map((sub) => {
+                        const filteredProducts = (sub.products || []).filter((p) => {
+                            const text = `
+                                ${p.title || ""}
+                                ${p.brand || ""}
+                                ${p.model || ""}
+                                ${p.instrument || ""}
+                                ${p.category || ""}
+                                ${p.subCategory || ""}
+                                ${p.parameters || ""}
+                                ${p.desc || ""}
+                            `.toLowerCase();
+                            return text.includes(query);
+                        });
+                        return { ...sub, products: filteredProducts };
+                    })
+                    .filter((sub) => sub.products.length > 0);
 
-            return { ...cat, subcategories: filteredSubs };
-        }).filter(cat => (cat.subcategories || []).length > 0);
-    }, [initialCategories, search]);
+                return { ...cat, subcategories: filteredSubs };
+            })
+            .filter((cat) => (cat.subcategories || []).length > 0);
+    }, [categories, search]);
 
     // Flat list of filtered products for global operations and pagination checks
     const filteredProducts = useMemo(() => {
         const list = [];
-        filteredCategories.forEach(cat => {
-            cat.subcategories.forEach(sub => {
+        filteredCategories.forEach((cat) => {
+            cat.subcategories.forEach((sub) => {
                 list.push(...sub.products);
             });
         });
@@ -75,30 +123,33 @@ export default function ProductsClient({
     }, [search]);
 
     const toggleCategory = useCallback((id) => {
-        setOpenedCategories(prev => ({ ...prev, [id]: !prev[id] }));
+        setOpenedCategories((prev) => ({ ...prev, [id]: !prev[id] }));
         setActiveCategory(id);
     }, []);
 
     const toggleSubcategory = useCallback((id) => {
-        setOpenedSubcategories(prev => ({ ...prev, [id]: !prev[id] }));
+        setOpenedSubcategories((prev) => ({ ...prev, [id]: !prev[id] }));
         setActiveSubcategory(id);
     }, []);
 
-    const scrollToProduct = useCallback((slug, categoryId, subcategoryId) => {
-        // Expand the target category and subcategory
-        setOpenedCategories(prev => ({ ...prev, [categoryId]: true }));
-        setOpenedSubcategories(prev => ({ ...prev, [subcategoryId]: true }));
-        setActiveCategory(categoryId);
-        setActiveSubcategory(subcategoryId);
+    const scrollToProduct = useCallback(
+        (slug, categoryId, subcategoryId) => {
+            // Expand the target category and subcategory
+            setOpenedCategories((prev) => ({ ...prev, [categoryId]: true }));
+            setOpenedSubcategories((prev) => ({ ...prev, [subcategoryId]: true }));
+            setActiveCategory(categoryId);
+            setActiveSubcategory(subcategoryId);
 
-        // Find index of targeted product to adjust pagination boundary
-        const index = filteredProducts.findIndex(p => p.slug === slug);
-        if (index !== -1) {
-            setVisibleCount(prev => Math.max(prev, index + 5));
-        }
+            // Find index of targeted product to adjust pagination boundary
+            const index = filteredProducts.findIndex((p) => p.slug === slug);
+            if (index !== -1) {
+                setVisibleCount((prev) => Math.max(prev, index + 5));
+            }
 
-        setPendingScroll(slug);
-    }, [filteredProducts]);
+            setPendingScroll(slug);
+        },
+        [filteredProducts]
+    );
 
     // Handle scroll trigger for pagination loading
     useEffect(() => {
@@ -119,32 +170,32 @@ export default function ProductsClient({
         return () => observer.disconnect();
     }, [filteredProducts.length]);
 
-    // Handle scroll synchronization for active category and subcategory (Amazon-style navigation)
+    // Handle scroll synchronization for active category and subcategory
     useEffect(() => {
         if (filteredCategories.length === 0) return;
 
         const observerOptions = {
             root: null,
             rootMargin: "-120px 0px -75% 0px",
-            threshold: 0
+            threshold: 0,
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     const target = entry.target;
-                    
+
                     if (target.classList.contains("category-section")) {
                         const catId = target.dataset.categoryId;
                         setActiveCategory(catId);
-                        setOpenedCategories(prev => ({ ...prev, [catId]: true }));
+                        setOpenedCategories((prev) => ({ ...prev, [catId]: true }));
                     } else if (target.classList.contains("subcategory-group")) {
                         const subId = target.dataset.subcategoryId;
                         const catId = target.dataset.categoryId;
                         setActiveSubcategory(subId);
-                        setOpenedSubcategories(prev => ({ ...prev, [subId]: true }));
+                        setOpenedSubcategories((prev) => ({ ...prev, [subId]: true }));
                         setActiveCategory(catId);
-                        setOpenedCategories(prev => ({ ...prev, [catId]: true }));
+                        setOpenedCategories((prev) => ({ ...prev, [catId]: true }));
                     }
                 }
             });
@@ -208,12 +259,12 @@ export default function ProductsClient({
                         Biomedical Equipment Catalog
                     </span>
                     <h1>
-                        Advanced Laboratory & Diagnostic Equipment
+                        Advanced Laboratory &amp; Diagnostic Equipment
                     </h1>
                     <p>
                         Discover premium biomedical, laboratory and hospital
                         equipment designed for healthcare institutions, research centers and
-                        diagnostic labs{city && ` in ${city}`}
+                        diagnostic labs{city && ` in ${city}`}.
                     </p>
                 </div>
             </div>
@@ -221,7 +272,7 @@ export default function ProductsClient({
             <div className="search-section">
                 <input
                     type="text"
-                    placeholder="Search products..."
+                    placeholder="Search equipment by title, brand, model, parameter..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -229,7 +280,7 @@ export default function ProductsClient({
 
             <div className="products-top-bar">
                 <span>
-                    Total Products : <strong>{filteredProducts.length}</strong>
+                    Total Available Products : <strong>{filteredProducts.length}</strong>
                 </span>
             </div>
 
@@ -258,127 +309,162 @@ export default function ProductsClient({
 
                 {/* Right Product List */}
                 <div className="products-right">
-                    {filteredCategories.map((category) => {
-                        let categoryRenderedCount = 0;
+                    {filteredCategories.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "60px 20px", color: "#64748b" }}>
+                            <h3>No equipment found matching "{search}"</h3>
+                            <p>Try clearing your search term or exploring other categories.</p>
+                        </div>
+                    ) : (
+                        filteredCategories.map((category) => {
+                            let categoryRenderedCount = 0;
 
-                        // Filter subcategories containing products matching scroll limits
-                        const subcategoriesWithVisibleProducts = (category.subcategories || []).map(sub => {
-                            const visibleSubProducts = (sub.products || []).filter(() => {
-                                const isVisible = globalRenderedCount < visibleCount;
-                                if (isVisible) {
-                                    globalRenderedCount++;
-                                    categoryRenderedCount++;
-                                }
-                                return isVisible;
-                            });
-                            return { ...sub, products: visibleSubProducts };
-                        }).filter(sub => sub.products.length > 0);
-
-                        if (subcategoriesWithVisibleProducts.length === 0) return null;
-
-                        return (
-                            <section
-                                key={category.id}
-                                className="category-section"
-                                data-category-id={category.id}
-                                ref={(el) => {
-                                    if (el) {
-                                        const header = el.querySelector(".category-header");
-                                        if (header) {
-                                            el.style.setProperty("--category-header-height", `${header.offsetHeight}px`);
+                            // Filter subcategories containing products matching scroll limits
+                            const subcategoriesWithVisibleProducts = (category.subcategories || [])
+                                .map((sub) => {
+                                    const visibleSubProducts = (sub.products || []).filter(() => {
+                                        const isVisible = globalRenderedCount < visibleCount;
+                                        if (isVisible) {
+                                            globalRenderedCount++;
+                                            categoryRenderedCount++;
                                         }
-                                    }
-                                }}
-                            >
-                                <div className="category-header">
-                                    <h2>{category.name}</h2>
-                                    <span>{categoryRenderedCount} Products</span>
-                                </div>
+                                        return isVisible;
+                                    });
+                                    return { ...sub, products: visibleSubProducts };
+                                })
+                                .filter((sub) => sub.products.length > 0);
 
-                                {subcategoriesWithVisibleProducts.map((sub) => (
-                                    <div key={sub.id} className="subcategory-group" data-subcategory-id={sub.id} data-category-id={category.id} style={{ marginBottom: "35px" }}>
-                                        <h3 className="subcategory-header-sticky">
-                                            {sub.name}
-                                        </h3>
-                                        <div className="category-products">
-                                            {sub.products.map((product) => (
-                                                <div
-                                                    key={product.uid}
-                                                    id={product.slug}
-                                                    className="product-row"
-                                                >
-                                                    {/* IMAGE */}
-                                                    <div className="product-row-image" style={{ position: "relative" }}>
-                                                        <Image
-                                                            src={
-                                                                product.images?.[0] ||
-                                                                product.image ||
-                                                                "https://via.placeholder.com/400x300"
-                                                            }
-                                                            alt={product.title}
-                                                            fill
-                                                            sizes="(max-width: 768px) 100vw, 240px"
-                                                            style={{ objectFit: "contain", padding: "10px" }}
-                                                            loading="lazy"
-                                                        />
-                                                    </div>
+                            if (subcategoriesWithVisibleProducts.length === 0) return null;
 
-                                                    {/* CONTENT */}
-                                                    <div className="product-row-content">
-                                                        <h3>{product.title}</h3>
-                                                        <p>
-                                                            {product.description ||
-                                                                product.desc ||
-                                                                "Premium biomedical equipment designed for hospitals, laboratories and healthcare institutions."}
-                                                        </p>
-                                                        <div className="product-info-grid">
-                                                            <div className="info-box">
-                                                                <span>Brand</span>
-                                                                <strong>{product.brand || "N/A"}</strong>
+                            return (
+                                <section
+                                    key={category.id}
+                                    className="category-section"
+                                    data-category-id={category.id}
+                                    ref={(el) => {
+                                        if (el) {
+                                            const header = el.querySelector(".category-header");
+                                            if (header) {
+                                                el.style.setProperty("--category-header-height", `${header.offsetHeight}px`);
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <div className="category-header">
+                                        <h2>{category.name}</h2>
+                                        <span>{categoryRenderedCount} Products</span>
+                                    </div>
+
+                                    {subcategoriesWithVisibleProducts.map((sub) => (
+                                        <div
+                                            key={sub.id}
+                                            className="subcategory-group"
+                                            data-subcategory-id={sub.id}
+                                            data-category-id={category.id}
+                                            style={{ marginBottom: "35px" }}
+                                        >
+                                            <h3 className="subcategory-header-sticky">
+                                                {sub.name}
+                                            </h3>
+                                            <div className="category-products">
+                                                {sub.products.map((product) => {
+                                                    const imgUrl = product.images?.[0] || product.image || "/placeholder-product.jpg";
+                                                    return (
+                                                        <div
+                                                            key={product.id || product.slug}
+                                                            id={product.slug}
+                                                            className="product-row"
+                                                        >
+                                                            {/* IMAGE */}
+                                                            <div className="product-row-image" style={{ position: "relative" }}>
+                                                                <img
+                                                                    src={imgUrl}
+                                                                    alt={product.title}
+                                                                    style={{ width: "100%", height: "100%", objectFit: "contain", padding: "10px" }}
+                                                                    loading="lazy"
+                                                                />
                                                             </div>
-                                                            <div className="info-box">
-                                                                <span>Model</span>
-                                                                <strong>{product.model || "N/A"}</strong>
+
+                                                            {/* CONTENT */}
+                                                            <div className="product-row-content">
+                                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", flexWrap: "wrap" }}>
+                                                                    <h3 style={{ margin: 0 }}>{product.title}</h3>
+                                                                    {product.price && (
+                                                                        <span style={{ fontSize: "14px", fontWeight: "700", color: "#059669", background: "#ecfdf5", padding: "2px 8px", borderRadius: "6px" }}>
+                                                                            ₹{product.price}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+                                                                <p>
+                                                                    {product.description ||
+                                                                        product.desc ||
+                                                                        "Premium biomedical equipment designed for hospitals, laboratories and healthcare institutions."}
+                                                                </p>
+
+                                                                <div className="product-info-grid">
+                                                                    <div className="info-box">
+                                                                        <span>Brand</span>
+                                                                        <strong>{product.brand || "Human Biomedicals"}</strong>
+                                                                    </div>
+                                                                    <div className="info-box">
+                                                                        <span>Model</span>
+                                                                        <strong>{product.model || "Standard"}</strong>
+                                                                    </div>
+                                                                    {product.instrument && (
+                                                                        <div className="info-box">
+                                                                            <span>Instrument</span>
+                                                                            <strong>{product.instrument}</strong>
+                                                                        </div>
+                                                                    )}
+                                                                    {product.capacity && (
+                                                                        <div className="info-box">
+                                                                            <span>Capacity</span>
+                                                                            <strong>{product.capacity}</strong>
+                                                                        </div>
+                                                                    )}
+                                                                    {product.throughput && (
+                                                                        <div className="info-box">
+                                                                            <span>Throughput</span>
+                                                                            <strong>{product.throughput}</strong>
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="info-box">
+                                                                        <span>Category</span>
+                                                                        <strong>{product.category}</strong>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div className="info-box">
-                                                                <span>Instrument</span>
-                                                                <strong>{product.instrument || "N/A"}</strong>
-                                                            </div>
-                                                            <div className="info-box">
-                                                                <span>Subcategory</span>
-                                                                <strong>{product.subCategory}</strong>
+
+                                                            {/* BUTTON */}
+                                                            <div className="product-row-action">
+                                                                <Link
+                                                                    className="quote-btn-product"
+                                                                    href={
+                                                                        district
+                                                                            ? `/${district}/items/${product.slug}`
+                                                                            : `/items/${product.slug}`
+                                                                    }
+                                                                >
+                                                                    View Details
+                                                                </Link>
                                                             </div>
                                                         </div>
-                                                    </div>
-
-                                                    {/* BUTTON */}
-                                                    <div className="product-row-action">
-                                                        <Link
-                                                            className="quote-btn-product"
-                                                            href={
-                                                                district
-                                                                    ? `/${district}/items/${product.slug}`
-                                                                    : `/items/${product.slug}`
-                                                            }
-                                                        >
-                                                            Get Quote
-                                                        </Link>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </section>
-                        );
-                    })}
+                                    ))}
+                                </section>
+                            );
+                        })
+                    )}
 
                     <div id="scroll-sentinel" style={{ height: "20px" }} />
                 </div>
             </div>
 
             {showTopButton && (
-                <button onClick={scrollToTop} className="back-to-top">
+                <button onClick={scrollToTop} className="back-to-top" aria-label="Back to top">
                     <ChevronUp size={24} />
                 </button>
             )}
@@ -398,7 +484,7 @@ const CategoryItem = React.memo(({
     toggleSubcategory,
     activeCategory,
     activeSubcategory,
-    scrollToProduct
+    scrollToProduct,
 }) => {
     const totalCount = useMemo(() => {
         return (category.subcategories || []).reduce((acc, sub) => acc + (sub.products || []).length, 0);
@@ -407,9 +493,7 @@ const CategoryItem = React.memo(({
     return (
         <div className="accordion-item" key={category.id}>
             <button
-                className={`accordion-header ${
-                    activeCategory === category.id ? "active" : ""
-                }`}
+                className={`accordion-header ${activeCategory === category.id ? "active" : ""}`}
                 onClick={() => toggleCategory(category.id)}
             >
                 <span className="accordion-left">
@@ -425,14 +509,12 @@ const CategoryItem = React.memo(({
                 </span>
             </button>
             <div
-                className={`accordion-content ${
-                    isExpanded ? "open" : ""
-                }`}
+                className={`accordion-content ${isExpanded ? "open" : ""}`}
                 style={{
                     display: isExpanded ? "block" : "none",
                     height: "auto",
                     padding: isExpanded ? "10px 0 10px 15px" : "0",
-                    transition: "none"
+                    transition: "none",
                 }}
             >
                 {(category.subcategories || []).map((sub) => (
@@ -459,16 +541,14 @@ const SubcategoryItem = React.memo(({
     isExpanded,
     toggleSubcategory,
     activeSubcategory,
-    scrollToProduct
+    scrollToProduct,
 }) => {
     const productCount = (subcategory.products || []).length;
 
     return (
         <div className="subcategory-item" style={{ borderBottom: "1px solid #f1f5f9", paddingBottom: "4px", marginBottom: "4px" }}>
             <button
-                className={`subcategory-header ${
-                    activeSubcategory === subcategory.id ? "active-sub" : ""
-                }`}
+                className={`subcategory-header ${activeSubcategory === subcategory.id ? "active-sub" : ""}`}
                 onClick={() => toggleSubcategory(subcategory.id)}
                 style={{
                     width: "100%",
@@ -481,7 +561,7 @@ const SubcategoryItem = React.memo(({
                     cursor: "pointer",
                     textAlign: "left",
                     fontWeight: "600",
-                    color: activeSubcategory === subcategory.id ? "#0f4c81" : "#475569"
+                    color: activeSubcategory === subcategory.id ? "#0f4c81" : "#475569",
                 }}
             >
                 <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "14px" }}>
@@ -502,12 +582,12 @@ const SubcategoryItem = React.memo(({
                     flexDirection: "column",
                     paddingLeft: "15px",
                     gap: "2px",
-                    marginBottom: "8px"
+                    marginBottom: "8px",
                 }}
             >
                 {isExpanded && (subcategory.products || []).map((product) => (
                     <button
-                        key={product.uid}
+                        key={product.id || product.slug}
                         className="accordion-link"
                         style={{
                             textAlign: "left",
@@ -517,7 +597,7 @@ const SubcategoryItem = React.memo(({
                             cursor: "pointer",
                             fontSize: "13px",
                             color: "#64748b",
-                            width: "100%"
+                            width: "100%",
                         }}
                         onClick={() =>
                             scrollToProduct(product.slug, categoryId, subcategory.id)

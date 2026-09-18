@@ -3,144 +3,60 @@
 import { usePathname } from "next/navigation";
 import "./FeaturedProducts.css";
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase";
 import Link from "next/link";
 
-export default function FeaturedProducts() {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+export default function FeaturedProducts({ initialProducts = [] }) {
+    const [products, setProducts] = useState(initialProducts.slice(0, 4));
+    const [loading, setLoading] = useState(initialProducts.length === 0);
 
     const pathname = usePathname();
 
-    const pathParts = pathname
-        .split("/")
-        .filter(Boolean);
-
-    const staticRoutes = [
-        "about",
-        "items",
-        "services",
-        "contact",
-    ];
+    const pathParts = pathname.split("/").filter(Boolean);
+    const staticRoutes = ["about", "items", "services", "contact"];
 
     const district =
-        pathParts[0] &&
-            !staticRoutes.includes(pathParts[0])
+        pathParts[0] && !staticRoutes.includes(pathParts[0])
             ? pathParts[0]
             : "";
 
     useEffect(() => {
-        // const fetchProducts = async () => {
-        //     try {
-        //         const snap = await getDoc(
-        //             doc(
-        //                 db,
-        //                 "websites",
-        //                 "humanbiomedicalsin",
-        //                 "pages",
-        //                 "products"
-        //             )
-        //         );
+        let isMounted = true;
 
-        //         if (snap.exists()) {
-        //             const allProducts =
-        //                 snap.data().products || [];
-
-        //             setProducts(
-        //                 allProducts.slice(0, 4)
-        //             );
-        //         }
-        //     } catch (error) {
-        //         console.error(error);
-        //     } finally {
-        //         setLoading(false);
-        //     }
-        // };
-
-        const fetchProducts = async () => {
+        const loadFeatured = async () => {
             try {
-                // Categories
-                const categorySnap = await getDocs(
-                    collection(
-                        db,
-                        "websites",
-                        "humanbiomedicalsin",
-                        "pages",
-                        "categoryproducts",
-                        "categories"
-                    )
-                );
-
-                let allProducts = [];
-
-                // Har category ke andar jao
-                for (const categoryDoc of categorySnap.docs) {
-
-                    const subCategorySnap = await getDocs(
-                        collection(
-                            db,
-                            "websites",
-                            "humanbiomedicalsin",
-                            "pages",
-                            "categoryproducts",
-                            "categories",
-                            categoryDoc.id,
-                            "subcategories"
-                        )
-                    );
-
-                    // Har subcategory ke products nikalo
-                    subCategorySnap.forEach((subDoc) => {
-
-                        const data = subDoc.data();
-
-                        if (Array.isArray(data.products)) {
-                            allProducts.push(...data.products);
-                        }
-
-                    });
+                const res = await fetch("/api/products", { cache: "no-store" });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (isMounted && data.products && data.products.length > 0) {
+                        setProducts(data.products.slice(0, 4));
+                    }
                 }
-
-                console.log("Products:", allProducts);
-
-                setProducts(allProducts.slice(0, 4));
-
-            } catch (error) {
-                console.error(error);
+            } catch (err) {
+                console.error("Error loading featured products:", err);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
 
-        fetchProducts();
+        loadFeatured();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
-    if (loading) {
+    if (loading && products.length === 0) {
         return (
-            <section
-                className="featured-products"
-                key={pathname}
-            >
-                <h2>Featured Products</h2>
-
+            <section className="featured-products" key={pathname}>
+                <h2>Featured Biomedical Products</h2>
                 <div className="products-grid">
                     {[1, 2, 3, 4].map((item) => (
-                        <div
-                            className="product-card"
-                            key={item}
-                        >
+                        <div className="product-card" key={item}>
                             <div className="skeleton featured-image-loader"></div>
-
                             <div className="product-content">
                                 <div className="skeleton featured-title-loader"></div>
-
                                 <div className="skeleton featured-text-loader"></div>
                                 <div className="skeleton featured-text-loader short"></div>
-
-                                <div className="skeleton featured-text-loader"></div>
-                                <div className="skeleton featured-text-loader short"></div>
-
                                 <div className="skeleton featured-btn-loader"></div>
                             </div>
                         </div>
@@ -150,72 +66,66 @@ export default function FeaturedProducts() {
         );
     }
 
+    if (products.length === 0) {
+        return null;
+    }
+
     return (
-        <section
-            className="featured-products"
-            key={pathname}
-        >
-            <h2>Featured Products</h2>
+        <section className="featured-products" key={pathname}>
+            <h2>Featured Biomedical Products</h2>
 
             <div className="products-grid">
-                {products.map((product, index) => (
-                    <div
-                        className="product-card"
-                        key={`${product.slug || product.id || "product"}-${index}`}
-                    >
-                        <div className="product-image">
-                            <img
-                                src={
-                                    product.image ||
-                                    product.images?.[0] ||
-                                    "/placeholder-product.jpg"
-                                }
-                                alt={product.title}
-                                loading="lazy"
-                            />
-                        </div>
-
-                        <div className="product-content">
-                            <h3>
-                                {product.title}
-                            </h3>
-
-                            <div className="product-meta">
-                                <p>
-                                    <strong>Brand:</strong>{" "}
-                                    {product.brand ||
-                                        "N/A"}
-                                </p>
-
-                                <p>
-                                    <strong>Model:</strong>{" "}
-                                    {product.model ||
-                                        "N/A"}
-                                </p>
+                {products.map((product, index) => {
+                    const imgUrl = product.images?.[0] || product.image || "/placeholder-product.jpg";
+                    return (
+                        <div
+                            className="product-card"
+                            key={`${product.slug || product.id || "product"}-${index}`}
+                        >
+                            <div className="product-image">
+                                <img
+                                    src={imgUrl}
+                                    alt={product.title}
+                                    loading="lazy"
+                                />
                             </div>
 
-                            <Link
-                                href={
-                                    district
-                                        ? `/${district}/items/${product.slug}`
-                                        : `/items/${product.slug}`
-                                }
-                                className="product-btn"
-                            >
-                                View Details
-                            </Link>
+                            <div className="product-content">
+                                <h3>{product.title}</h3>
+
+                                <div className="product-meta">
+                                    <p>
+                                        <strong>Brand:</strong> {product.brand || "Human Biomedicals"}
+                                    </p>
+                                    <p>
+                                        <strong>Model:</strong> {product.model || "Standard"}
+                                    </p>
+                                    {product.price && (
+                                        <p style={{ color: "#059669", fontWeight: "700" }}>
+                                            <strong>Price:</strong> ₹{product.price}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <Link
+                                    href={
+                                        district
+                                            ? `/${district}/items/${product.slug}`
+                                            : `/items/${product.slug}`
+                                    }
+                                    className="product-btn"
+                                >
+                                    View Details
+                                </Link>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="view-all-btn-wrap">
                 <Link
-                    href={
-                        district
-                            ? `/${district}/items`
-                            : "/items"
-                    }
+                    href={district ? `/${district}/items` : "/items"}
                     className="view-all-btn"
                 >
                     View All Products
