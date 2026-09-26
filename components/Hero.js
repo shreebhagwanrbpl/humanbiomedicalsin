@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
 import Link from "next/link";
 import Image from "next/image";
 import "./Hero.css";
 
 export default function Hero({ heroData: initialHeroData, city: propCity, district: propDistrict }) {
     const [heroData, setHeroData] = useState(initialHeroData || null);
+    const [contactInfo, setContactInfo] = useState([]);
     const [loading, setLoading] = useState(!initialHeroData);
 
     const pathname = usePathname();
@@ -41,32 +40,48 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
     const city = propCity !== undefined ? propCity : clientCity;
 
     useEffect(() => {
-        if (initialHeroData) return;
-
-        const fetchHero = async () => {
+        const fetchHeroAndContact = async () => {
             try {
-                const snap = await getDoc(
-                    doc(
-                        db,
-                        "websites",
-                        "humanbiomedicalsin",
-                        "pages",
-                        "home"
-                    )
-                );
+                if (!initialHeroData) {
+                    const res = await fetch("/api/site-data?type=home");
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json?.data) {
+                            setHeroData(json.data);
+                        }
+                    }
+                }
 
-                if (snap.exists()) {
-                    setHeroData(snap.data());
+                const contactRes = await fetch("/api/site-data?type=contact");
+                if (contactRes.ok) {
+                    const contactJson = await contactRes.json();
+                    if (contactJson?.data) {
+                        const info = Array.isArray(contactJson.data.contactInfo)
+                            ? contactJson.data.contactInfo
+                            : Array.isArray(contactJson.data)
+                            ? contactJson.data
+                            : [];
+                        setContactInfo(info);
+                    }
                 }
             } catch (err) {
-                console.error(err);
+                console.error("Error fetching hero/contact data:", err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchHero();
+        fetchHeroAndContact();
     }, [initialHeroData]);
+
+    const phoneItem = contactInfo.find(
+        (item) =>
+            item.label?.toLowerCase().includes("phone") ||
+            item.label?.toLowerCase().includes("mobile") ||
+            item.label?.toLowerCase().includes("call") ||
+            item.label?.toLowerCase().includes("contact")
+    );
+    const phoneNumber = phoneItem?.value || "";
 
     if (loading) {
         return (
@@ -89,6 +104,10 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
         );
     }
 
+    const titleText = heroData?.title
+        ? `${heroData.title}${city ? ` In ${city}` : ""}`
+        : (city ? `Biomedical Equipment Supplier In ${city}` : "");
+
     return (
         <section className="hero">
             <div className="hero-left">
@@ -96,47 +115,48 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
                     🏆 India's Leading Biomedical Equipment Supplier
                 </span>
 
-                <h1>
-                    {heroData?.title || "Trusted Medical & Laboratory Equipment Supplier"}
-                    {city ? ` In ${city}` : " In India"}
-                </h1>
+                {titleText && <h1>{titleText}</h1>}
 
-                <p>
-                    {heroData?.description || "Human Biomedical LLP delivers high-precision CBC machines, hematology analyzers, biochemistry systems, and diagnostic instruments with expert installation, AMC, and 24/7 technical support."}
-                </p>
+                {heroData?.description && <p>{heroData.description}</p>}
 
                 <div className="hero-buttons">
-                    <a
-                        className="hero-call-btn"
-                        href="tel:+919251598228"
-                    >
-                        📞 Call +91 9251598228
-                    </a>
+                    {phoneNumber && (
+                        <a
+                            className="hero-call-btn"
+                            href={`tel:${phoneNumber}`}
+                        >
+                            📞 Call {phoneNumber}
+                        </a>
+                    )}
 
-                    <Link
-                        className="primary-btn"
-                        href={district ? `/${district}/contact` : "/contact"}
-                    >
-                        {heroData?.button1Text || "Get Instant Quote"}
-                    </Link>
+                    {heroData?.button1Text && (
+                        <Link
+                            className="primary-btn"
+                            href={district ? `/${district}/contact` : "/contact"}
+                        >
+                            {heroData.button1Text}
+                        </Link>
+                    )}
 
-                    <Link
-                        className="secondary-btn"
-                        href={district ? `/${district}/items` : "/items"}
-                    >
-                        {heroData?.button2Text || "Browse Products"}
-                    </Link>
+                    {heroData?.button2Text && (
+                        <Link
+                            className="secondary-btn"
+                            href={district ? `/${district}/items` : "/items"}
+                        >
+                            {heroData.button2Text}
+                        </Link>
+                    )}
                 </div>
 
                 <div className="hero-features">
                     <div className="feature-item">
-                        ✓ 100% Genuine Brands
+                        ✓ Genuine Certified Brands
                     </div>
                     <div className="feature-item">
-                        ✓ PAN India Express Delivery
+                        ✓ Express Delivery
                     </div>
                     <div className="feature-item">
-                        ✓ 24/7 Technical Assistance
+                        ✓ Technical Assistance
                     </div>
                 </div>
             </div>
@@ -146,9 +166,9 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
                     <Image
                         src={
                             heroData?.imageUrl ||
-                            "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800"
+                            "/biomedical-hero.jpg"
                         }
-                        alt="Biomedical Equipment Laboratory"
+                        alt="Biomedical Equipment Laboratory Analyzer"
                         fill
                         sizes="(max-width: 992px) 100vw, 50vw"
                         priority
@@ -162,4 +182,4 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
             </div>
         </section>
     );
-}
+}

@@ -48,8 +48,8 @@ export default function AboutPage({ district = "" }) {
 
                 <div className="story-image">
                     <img
-                        src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200"
-                        alt="Laboratory"
+                        src="/biomedical-hero.jpg"
+                        alt="Biomedical Equipment Laboratory"
                     />
                 </div>
 

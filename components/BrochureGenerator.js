@@ -32,7 +32,7 @@ const loadImageAsBase64 = async (url) => {
     }
 };
 
-export default function BrochureGenerator({ product, selectedImage }) {
+export default function BrochureGenerator({ product, selectedImage, contactInfo = [] }) {
     const [downloading, setDownloading] = useState(false);
     const [base64Image, setBase64Image] = useState("");
     const brochureRef = useRef(null);
@@ -149,7 +149,22 @@ export default function BrochureGenerator({ product, selectedImage }) {
                             <h1>Human Biomedical LLP</h1>
                         </div>
                         <div className="header-right">
-                            <p><strong>Phone:</strong> +91 9251598228, +91 8112279728</p>
+                            {(() => {
+                                const phoneList = contactInfo.filter(
+                                    (item) =>
+                                        item.label?.toLowerCase().includes("phone") ||
+                                        item.label?.toLowerCase().includes("mobile") ||
+                                        item.label?.toLowerCase().includes("call") ||
+                                        item.label?.toLowerCase().includes("contact")
+                                );
+                                const phoneDisplay = phoneList.length > 0
+                                    ? phoneList.map((p) => p.value).join(", ")
+                                    : "";
+
+                                return phoneDisplay ? (
+                                    <p><strong>Phone:</strong> {phoneDisplay}</p>
+                                ) : null;
+                            })()}
                             <p><strong>Web:</strong> www.humanbiomedicals.in</p>
                         </div>
                     </div>

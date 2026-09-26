@@ -1,6 +1,4 @@
-import { db } from "../lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
-import { fetchFullCatalog } from "../lib/db-server";
+import { fetchDistricts, fetchFullCatalog } from "@/lib/admin-api";
 
 export const revalidate = 3600;
 
@@ -34,11 +32,7 @@ export default async function sitemap() {
 
     // Districts
     try {
-        const districtSnap = await getDocs(
-            collection(db, "websites", "humanbiomedicalsin", "districts")
-        );
-
-        const districts = districtSnap.docs.map((doc) => doc.data());
+        const districts = await fetchDistricts();
 
         districts.forEach((district) => {
             const slug = district.slug;

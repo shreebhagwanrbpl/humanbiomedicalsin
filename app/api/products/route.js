@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchFullCatalog } from "@/lib/db-server";
+import { fetchFullCatalog, ADMIN_API_BASE_URL, WEBSITE_ID } from "@/lib/admin-api";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,8 +11,8 @@ export async function GET() {
     return NextResponse.json(
       {
         success: true,
-        website: "humanbiomedicalsin",
-        company: "human",
+        website: WEBSITE_ID,
+        adminApiBaseUrl: ADMIN_API_BASE_URL,
         totalCount: data.totalCount,
         categories: data.categoryList,
         products: data.categoryProducts,
@@ -23,6 +23,7 @@ export async function GET() {
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
           "CDN-Cache-Control": "no-store",
+          "Pragma": "no-cache",
         },
       }
     );
@@ -32,6 +33,7 @@ export async function GET() {
       {
         success: false,
         error: error.message || "Failed to fetch products",
+        products: [],
       },
       {
         status: 500,

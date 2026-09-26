@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Navbar.css";
 import Image from "next/image";
-import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import { FaPhoneAlt, FaEnvelope } from "react-icons/fa";
 
 export default function Navbar() {
     const pathname = usePathname();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [contactInfo, setContactInfo] = useState([]);
 
     const pathParts = pathname
         .split("/")
@@ -36,29 +37,73 @@ export default function Navbar() {
 
     const closeMenu = () => setMenuOpen(false);
 
+    useEffect(() => {
+        const loadContact = async () => {
+            try {
+                const res = await fetch("/api/site-data?type=contact");
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json?.data) {
+                        const info = Array.isArray(json.data.contactInfo)
+                            ? json.data.contactInfo
+                            : Array.isArray(json.data)
+                            ? json.data
+                            : [];
+                        setContactInfo(info);
+                    }
+                }
+            } catch (err) {
+                // Silently ignore
+            }
+        };
+
+        loadContact();
+    }, []);
+
+    const email = contactInfo.find(
+        (item) => item.label?.toLowerCase() === "email"
+    )?.value;
+
+    const phoneList = contactInfo.filter(
+        (item) =>
+            item.label?.toLowerCase().includes("phone") ||
+            item.label?.toLowerCase().includes("mobile") ||
+            item.label?.toLowerCase().includes("call") ||
+            item.label?.toLowerCase().includes("contact")
+    );
+
     return (
         <header className="navbar-wrapper">
             {/* TOP BAR */}
-            <div className="top-bar">
-                <div className="top-bar-container">
-                    <div className="top-info">
-                        <span className="top-item">
-                            <FaPhoneAlt className="top-icon" />
-                            <span>Call: </span>
-                            <a href="tel:+919251598228">+91 9251598228</a>
-                            <span className="divider">|</span>
-                            <a href="tel:+918112279728">+91 8112279728</a>
-                        </span>
-                        <span className="top-item email-item">
-                            <FaEnvelope className="top-icon" />
-                            <a href="mailto:humanbiomedicalsin@gmail.com">humanbiomedicalsin@gmail.com</a>
-                        </span>
-                    </div>
-                    <div className="top-right">
-                        <span className="top-badge">PAN India Delivery & Support</span>
+            {(phoneList.length > 0 || email) && (
+                <div className="top-bar">
+                    <div className="top-bar-container">
+                        <div className="top-info">
+                            {phoneList.length > 0 && (
+                                <span className="top-item">
+                                    <FaPhoneAlt className="top-icon" />
+                                    <span>Call: </span>
+                                    {phoneList.map((p, idx) => (
+                                        <span key={idx}>
+                                            {idx > 0 && <span className="divider">|</span>}
+                                            <a href={`tel:${p.value}`}>{p.value}</a>
+                                        </span>
+                                    ))}
+                                </span>
+                            )}
+                            {email && (
+                                <span className="top-item email-item">
+                                    <FaEnvelope className="top-icon" />
+                                    <a href={`mailto:${email}`}>{email}</a>
+                                </span>
+                            )}
+                        </div>
+                        <div className="top-right">
+                            <span className="top-badge">PAN India Delivery & Support</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* MAIN NAVBAR */}
             <nav className="navbar">
@@ -113,14 +158,15 @@ export default function Navbar() {
                             Contact
                         </Link>
 
-                        <div className="mobile-contact-numbers">
-                            <a href="tel:+919251598228" className="phone-btn-link">
-                                📞 +91 9251598228
-                            </a>
-                            <a href="tel:+918112279728" className="phone-btn-link">
-                                📞 +91 8112279728
-                            </a>
-                        </div>
+                        {phoneList.length > 0 && (
+                            <div className="mobile-contact-numbers">
+                                {phoneList.map((p, idx) => (
+                                    <a key={idx} href={`tel:${p.value}`} className="phone-btn-link">
+                                        📞 {p.value}
+                                    </a>
+                                ))}
+                            </div>
+                        )}
 
                         <Link
                             href={makeLink("/contact")}
@@ -134,9 +180,11 @@ export default function Navbar() {
 
                     {/* DESKTOP BUTTONS */}
                     <div className="desktop-actions">
-                        <a href="tel:+919251598228" className="nav-call-btn">
-                            <FaPhoneAlt /> +91 9251598228
-                        </a>
+                        {phoneList.length > 0 && (
+                            <a href={`tel:${phoneList[0].value}`} className="nav-call-btn">
+                                <FaPhoneAlt /> {phoneList[0].value}
+                            </a>
+                        )}
                         <Link
                             href={makeLink("/contact")}
                             className="quote-btn desktop-btn"
@@ -149,4 +197,4 @@ export default function Navbar() {
             </nav>
         </header>
     );
-}
+}

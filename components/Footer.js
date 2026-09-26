@@ -1,9 +1,9 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { doc } from "firebase/firestore";
-import { db, getCachedDoc } from "../lib/firebase";
+
 export default function Footer() {
     const [contactInfo, setContactInfo] = useState([]);
     const [districtData, setDistrictData] = useState(null);
@@ -36,85 +36,68 @@ export default function Footer() {
             .replace(/-/g, " ")
             .replace(/\b\w/g, c => c.toUpperCase())
         : "";
+
     useEffect(() => {
-
         const fetchData = async () => {
-
             try {
-
-                const contactSnap = await getCachedDoc(
-                    doc(
-                        db,
-                        "websites",
-                        "humanbiomedicalsin",
-                        "pages",
-                        "contact"
-                    )
-                );
-
-                if (contactSnap.exists()) {
-                    setContactInfo(
-                        contactSnap.data().contactInfo || []
-                    );
-                }
-
-                if (
-                    district &&
-                    district.toLowerCase() !== "jaipur"
-                ) {
-
-                    const districtSnap = await getCachedDoc(
-                        doc(
-                            db,
-                            "websites",
-                            "humanbiomedicalsin",
-                            "districts",
-                            district
-                        )
-                    );
-
-                    if (districtSnap.exists()) {
-                        setDistrictData(
-                            districtSnap.data()
-                        );
+                const contactRes = await fetch("/api/site-data?type=contact");
+                if (contactRes.ok) {
+                    const contactJson = await contactRes.json();
+                    if (contactJson?.data) {
+                        const info = Array.isArray(contactJson.data.contactInfo)
+                            ? contactJson.data.contactInfo
+                            : Array.isArray(contactJson.data)
+                            ? contactJson.data
+                            : [];
+                        setContactInfo(info);
                     }
                 }
 
+                if (district && district.toLowerCase() !== "jaipur") {
+                    const districtRes = await fetch(`/api/site-data?type=districts&district=${encodeURIComponent(district)}`);
+                    if (districtRes.ok) {
+                        const districtJson = await districtRes.json();
+                        if (districtJson?.data) {
+                            setDistrictData(districtJson.data);
+                        }
+                    }
+                }
             } catch (err) {
-
-                console.error(err);
-
+                console.error("Error loading footer data:", err);
             } finally {
-
                 setLoading(false);
-
             }
         };
 
         fetchData();
-
     }, [district]);
-
-    const phonePrimary = "+91 9251598228";
-    const phoneSecondary = "+91 8112279728";
 
     const email =
         contactInfo.find(
             item =>
-                item.label.toLowerCase() === "email"
-        )?.value || "humanbiomedicalsin@gmail.com";
+                item.label?.toLowerCase() === "email"
+        )?.value || "";
 
     const address =
         contactInfo.find(
             item =>
-                item.label.toLowerCase() === "address"
-        )?.value || "Jaipur, Rajasthan, India";
+                item.label?.toLowerCase() === "address"
+        )?.value || "";
+
+    const phoneList =
+        contactInfo.filter(
+            item =>
+                item.label?.toLowerCase().includes("phone") ||
+                item.label?.toLowerCase().includes("mobile") ||
+                item.label?.toLowerCase().includes("call") ||
+                item.label?.toLowerCase().includes("contact")
+        );
 
     const displayAddress =
         !district ||
             district.toLowerCase() === "jaipur"
             ? address
-            : `${districtData?.district || city}, ${districtData?.state || ""}, India`;
+            : (districtData?.district || city ? `${districtData?.district || city}, ${districtData?.state || ""}, India` : address);
 
     if (loading) {
         return (
@@ -191,18 +174,23 @@ export default function Footer() {
 
                 <div className="footer-contact">
                     <h4>Contact Info</h4>
-                    <p>
-                        📞 <a href="tel:+919251598228" style={{ color: "inherit", textDecoration: "none" }}>+91 9251598228</a>
-                    </p>
-                    <p>
-                        📞 <a href="tel:+918112279728" style={{ color: "inherit", textDecoration: "none" }}>+91 8112279728</a>
-                    </p>
-                    <p>
-                        📧 <a href={`mailto:${email}`} style={{ color: "inherit", textDecoration: "none" }}>{email}</a>
-                    </p>
-                    <p>
-                        📍 {displayAddress}
-                    </p>
+                    {phoneList.length > 0 ? (
+                        phoneList.map((p, idx) => (
+                            <p key={idx}>
+                                📞 <a href={`tel:${p.value}`} style={{ color: "inherit", textDecoration: "none" }}>{p.value}</a>
+                            </p>
+                        ))
+                    ) : null}
+                    {email ? (
+                        <p>
+                            📧 <a href={`mailto:${email}`} style={{ color: "inherit", textDecoration: "none" }}>{email}</a>
+                        </p>
+                    ) : null}
+                    {displayAddress ? (
+                        <p>
+                            📍 {displayAddress}
+                        </p>
+                    ) : null}
                 </div>
             </div>
 

@@ -3,8 +3,6 @@
 import "./productSlug.css";
 import { useParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../../../lib/firebase";
 import toast from "react-hot-toast";
 import { FaPlay, FaPhoneAlt, FaWhatsapp, FaDownload, FaFilePdf } from "react-icons/fa";
 import Image from "next/image";
@@ -24,6 +22,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
     const [selectedImage, setSelectedImage] = useState(initialProduct?.images?.[0] || initialProduct?.image || "");
     const [selectedMedia, setSelectedMedia] = useState("image");
     const [submitting, setSubmitting] = useState(false);
+    const [contactInfo, setContactInfo] = useState([]);
     const pathname = usePathname();
 
     const pathParts = pathname.split("/").filter(Boolean);
@@ -42,6 +41,24 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
     const city = propCity !== undefined && propCity !== "" ? propCity : clientCity;
 
     useEffect(() => {
+        const loadContact = async () => {
+            try {
+                const res = await fetch("/api/site-data?type=contact");
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json?.data) {
+                        const info = Array.isArray(json.data.contactInfo)
+                            ? json.data.contactInfo
+                            : Array.isArray(json.data)
+                            ? json.data
+                            : [];
+                        setContactInfo(info);
+                    }
+                }
+            } catch (err) {}
+        };
+        loadContact();
+
         if (initialProduct) {
             setProduct(initialProduct);
             setSelectedImage(initialProduct.images?.[0] || initialProduct.image || "");
@@ -105,9 +122,12 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
 
         setSubmitting(true);
         try {
-            await addDoc(
-                collection(db, "websitesQueries", "humanbiomedicalsin", "productQueries"),
-                {
+            const res = await fetch("/api/product-query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
                     productName: product?.title || "Biomedical Product",
                     productSlug: product?.slug || slug,
                     productImage: selectedImage || product?.image || "",
@@ -118,24 +138,28 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                     price: product?.price || "",
                     district: district || "Direct",
                     city: city || "India",
-                    name,
-                    phone,
-                    email,
-                    message,
-                    createdAt: new Date(),
-                }
-            );
+                    name: name.trim(),
+                    phone: String(phone).trim(),
+                    email: email.trim(),
+                    message: message.trim(),
+                }),
+            });
 
-            toast.success("Enquiry Submitted Successfully! Our team will contact you soon.");
+            const data = await res.json();
 
-            setName("");
-            setPhone("");
-            setEmail("");
-            setMessage("");
-            setErrors({});
+            if (res.ok && data.success) {
+                toast.success(data.message || "Enquiry Submitted Successfully! Our team will contact you soon.");
+                setName("");
+                setPhone("");
+                setEmail("");
+                setMessage("");
+                setErrors({});
+            } else {
+                toast.error(data.error || "Submission failed");
+            }
         } catch (err) {
             console.error("Submission error:", err);
-            toast.error("Submission failed. Please call us directly.");
+            toast.error("Submission failed. Please try again.");
         } finally {
             setSubmitting(false);
         }
@@ -449,55 +473,75 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                     </div>
 
                     {/* BROCHURE PDF GENERATOR */}
-                    <BrochureGenerator product={product} selectedImage={selectedImage || allImages[0]} />
+                    <BrochureGenerator product={product} selectedImage={selectedImage || allImages[0]} contactInfo={contactInfo} />
 
                     {/* QUICK CONTACT ACTION BUTTONS */}
-                    <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
-                        <a
-                            href="tel:+919251598228"
-                            style={{
-                                flex: 1,
-                                minWidth: "160px",
-                                background: "#0f4c81",
-                                color: "#ffffff",
-                                padding: "12px 16px",
-                                borderRadius: "8px",
-                                textDecoration: "none",
-                                fontWeight: "700",
-                                fontSize: "14px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "8px",
-                                boxShadow: "0 2px 4px rgba(15, 76, 129, 0.2)",
-                            }}
-                        >
-                            <FaPhoneAlt /> Call +91 9251598228
-                        </a>
-                        <a
-                            href={`https://wa.me/919251598228?text=Hello%20Human%20Biomedicals,%20I%20am%20interested%20in%20${encodeURIComponent(product.title)}.`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                flex: 1,
-                                minWidth: "160px",
-                                background: "#25d366",
-                                color: "#ffffff",
-                                padding: "12px 16px",
-                                borderRadius: "8px",
-                                textDecoration: "none",
-                                fontWeight: "700",
-                                fontSize: "14px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "8px",
-                                boxShadow: "0 2px 4px rgba(37, 211, 102, 0.2)",
-                            }}
-                        >
-                            <FaWhatsapp /> WhatsApp Inquiry
-                        </a>
-                    </div>
+                    {(() => {
+                        const phoneItem = contactInfo.find(
+                            (item) =>
+                                item.label?.toLowerCase().includes("phone") ||
+                                item.label?.toLowerCase().includes("mobile") ||
+                                item.label?.toLowerCase().includes("call") ||
+                                item.label?.toLowerCase().includes("contact")
+                        );
+                        const phoneNumber = phoneItem?.value || "";
+                        const cleanPhoneForWa = phoneNumber.replace(/[^0-9]/g, "");
+
+                        if (!phoneNumber && !cleanPhoneForWa) return null;
+
+                        return (
+                            <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
+                                {phoneNumber && (
+                                    <a
+                                        href={`tel:${phoneNumber}`}
+                                        style={{
+                                            flex: 1,
+                                            minWidth: "160px",
+                                            background: "#0f4c81",
+                                            color: "#ffffff",
+                                            padding: "12px 16px",
+                                            borderRadius: "8px",
+                                            textDecoration: "none",
+                                            fontWeight: "700",
+                                            fontSize: "14px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            gap: "8px",
+                                            boxShadow: "0 2px 4px rgba(15, 76, 129, 0.2)",
+                                        }}
+                                    >
+                                        <FaPhoneAlt /> Call {phoneNumber}
+                                    </a>
+                                )}
+                                {cleanPhoneForWa && (
+                                    <a
+                                        href={`https://wa.me/${cleanPhoneForWa}?text=Hello%20Human%20Biomedicals,%20I%20am%20interested%20in%20${encodeURIComponent(product.title)}.`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            flex: 1,
+                                            minWidth: "160px",
+                                            background: "#25d366",
+                                            color: "#ffffff",
+                                            padding: "12px 16px",
+                                            borderRadius: "8px",
+                                            textDecoration: "none",
+                                            fontWeight: "700",
+                                            fontSize: "14px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            gap: "8px",
+                                            boxShadow: "0 2px 4px rgba(37, 211, 102, 0.2)",
+                                        }}
+                                    >
+                                        <FaWhatsapp /> WhatsApp Inquiry
+                                    </a>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
 

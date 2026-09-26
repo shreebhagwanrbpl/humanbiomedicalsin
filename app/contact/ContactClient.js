@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
-import { db } from "../../lib/firebase";
 import toast from "react-hot-toast";
 
 export default function ContactClient({ contactInfo = [], districtData = null, city = "", district = "" }) {
@@ -47,34 +45,35 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
 
         setSubmitting(true);
         try {
-            await addDoc(
-                collection(
-                    db,
-                    "websitesQueries",
-                    "humanbiomedicalsin",
-                    "contactQueries"
-                ),
-                {
-                    name,
-                    email,
-                    phone,
-                    message,
+            const res = await fetch("/api/contact-query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: name.trim(),
+                    email: email.trim(),
+                    phone: String(phone).trim(),
+                    message: message.trim(),
                     district: district || "jaipur",
-                    createdAt: Timestamp.now()
-                }
-            );
+                }),
+            });
 
-            toast.success("Message sent successfully");
+            const data = await res.json();
 
-            setName("");
-            setEmail("");
-            setPhone("");
-            setMessage("");
-            setErrors({});
-
+            if (res.ok && data.success) {
+                toast.success(data.message || "Message sent successfully");
+                setName("");
+                setEmail("");
+                setPhone("");
+                setMessage("");
+                setErrors({});
+            } else {
+                toast.error(data.error || "Submission failed");
+            }
         } catch (err) {
-            console.error(err);
-            toast.error("Submission failed");
+            console.error("Contact submission error:", err);
+            toast.error("Submission failed. Please try again.");
         } finally {
             setSubmitting(false);
         }
@@ -83,20 +82,29 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
     const contactEmail =
         contactInfo.find(
             item =>
-                item.label.toLowerCase() === "email"
-        )?.value || "humanbiomedicalsin@gmail.com";
+                item.label?.toLowerCase() === "email"
+        )?.value || "";
 
     const address =
         contactInfo.find(
             item =>
-                item.label.toLowerCase() === "address"
-        )?.value || "Jaipur, Rajasthan, India";
+                item.label?.toLowerCase() === "address"
+        )?.value || "";
+
+    const phoneList =
+        contactInfo.filter(
+            item =>
+                item.label?.toLowerCase().includes("phone") ||
+                item.label?.toLowerCase().includes("mobile") ||
+                item.label?.toLowerCase().includes("call") ||
+                item.label?.toLowerCase().includes("contact")
+        );
 
     const displayAddress =
         !district ||
-            district === "jaipur"
+            district.toLowerCase() === "jaipur"
             ? address
-            : `${districtData?.district || city}, ${districtData?.state || ""}, India`;
+            : (districtData?.district || city ? `${districtData?.district || city}, ${districtData?.state || ""}, India` : address);
 
     return (
         <main className="contact-page">
@@ -130,29 +138,44 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                             equipment solutions and support
                             {city && ` in ${city}`}.
                         </p>
-                        <div className="info-card">
-                            <h3>📞 Phone Numbers</h3>
-                            <p style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                                <a href="tel:+919251598228" style={{ color: "#0f4c81", fontWeight: "600", textDecoration: "none" }}>
-                                    +91 9251598228
-                                </a>
-                                <a href="tel:+918112279728" style={{ color: "#0f4c81", fontWeight: "600", textDecoration: "none" }}>
-                                    +91 8112279728
-                                </a>
-                            </p>
-                        </div>
-                        <div className="info-card">
-                            <h3>📧 Email Address</h3>
-                            <p>
-                                <a href={`mailto:${contactEmail}`} style={{ color: "inherit", textDecoration: "none" }}>
-                                    {contactEmail}
-                                </a>
-                            </p>
-                        </div>
-                        <div className="info-card">
-                            <h3>📍 Address</h3>
-                            <p>{displayAddress}</p>
-                        </div>
+
+                        {phoneList.length > 0 && (
+                            <div className="info-card">
+                                <h3>📞 Phone Numbers</h3>
+                                <p style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    {phoneList.map((p, idx) => (
+                                        <a
+                                            key={idx}
+                                            href={`tel:${p.value}`}
+                                            style={{ color: "#0f4c81", fontWeight: "600", textDecoration: "none" }}
+                                        >
+                                            {p.value}
+                                        </a>
+                                    ))}
+                                </p>
+                            </div>
+                        )}
+
+                        {contactEmail && (
+                            <div className="info-card">
+                                <h3>📧 Email Address</h3>
+                                <p>
+                                    <a
+                                        href={`mailto:${contactEmail}`}
+                                        style={{ color: "inherit", textDecoration: "none" }}
+                                    >
+                                        {contactEmail}
+                                    </a>
+                                </p>
+                            </div>
+                        )}
+
+                        {displayAddress && (
+                            <div className="info-card">
+                                <h3>📍 Address</h3>
+                                <p>{displayAddress}</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Side */}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchFullCatalog } from "@/lib/db-server";
+import { fetchFullCatalog, ADMIN_API_BASE_URL, WEBSITE_ID } from "@/lib/admin-api";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -8,11 +8,12 @@ export const fetchCache = "force-no-store";
 export async function GET() {
   try {
     const data = await fetchFullCatalog();
+
     return NextResponse.json(
       {
         success: true,
-        website: "humanbiomedicalsin",
-        company: "human",
+        website: WEBSITE_ID,
+        adminApiBaseUrl: ADMIN_API_BASE_URL,
         totalCount: data.totalCount,
         categories: data.categoryList,
         products: data.categoryProducts,
@@ -22,6 +23,8 @@ export async function GET() {
         status: 200,
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          "Pragma": "no-cache",
+          "Expires": "0",
         },
       }
     );
@@ -31,6 +34,8 @@ export async function GET() {
       {
         success: false,
         error: error.message || "Failed to fetch catalog",
+        categories: [],
+        products: [],
       },
       {
         status: 500,

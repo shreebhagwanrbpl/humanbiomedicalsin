@@ -1,29 +1,16 @@
 import { NextResponse } from "next/server";
-import { fetchFullCatalog, getDistrictData } from "@/lib/db-server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { fetchFullCatalog, fetchDistricts } from "@/lib/admin-api";
 
 export const dynamic = "force-dynamic";
 
-const WEBSITE = "humanbiomedicalsin";
 const DOMAIN = "https://humanbiomedicals.in";
 
 export async function GET() {
     try {
-        if (!adminDb) {
-            return new NextResponse("Firebase Admin environment variables missing", { status: 503 });
-        }
-
         // Districts
         let districts = [];
         try {
-            const districtSnap = await getDocs(
-                collection(db, "websites", WEBSITE, "districts")
-            );
-            districts = districtSnap.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+            districts = await fetchDistricts();
         } catch (e) {
             // fallback
         }
