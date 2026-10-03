@@ -50,12 +50,12 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                         const info = Array.isArray(json.data.contactInfo)
                             ? json.data.contactInfo
                             : Array.isArray(json.data)
-                            ? json.data
-                            : [];
+                                ? json.data
+                                : [];
                         setContactInfo(info);
                     }
                 }
-            } catch (err) {}
+            } catch (err) { }
         };
         loadContact();
 
@@ -373,7 +373,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             <h1 style={{ margin: "4px 0 6px 0", fontSize: "24px", color: "#0f172a", lineHeight: "1.3" }}>
                                 {product.title}
                             </h1>
-                            
+
                         </div>
 
                         <button
@@ -481,8 +481,8 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                                 item.label?.toLowerCase().includes("contact")
                         );
                         const rawPhone = phoneItem?.value;
-    const phoneNumber = "+91 9251616952";
-                        const cleanPhoneForWa = "919251616952";
+                        const phoneNumber = "+91 8112279728";
+                        const cleanPhoneForWa = "91+91 8112279728";
 
                         if (!phoneNumber && !cleanPhoneForWa) return null;
 
@@ -490,7 +490,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
                                 {phoneNumber && (
                                     <a
-                                        href="tel:+919251616952"
+                                        href="tel:+91+91 8112279728"
                                         style={{
                                             flex: 1,
                                             minWidth: "160px",

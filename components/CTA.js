@@ -26,8 +26,8 @@ export default function CTA() {
                         const info = Array.isArray(json.data.contactInfo)
                             ? json.data.contactInfo
                             : Array.isArray(json.data)
-                            ? json.data
-                            : [];
+                                ? json.data
+                                : [];
                         setContactInfo(info);
                     }
                 }
@@ -47,8 +47,8 @@ export default function CTA() {
             item.label?.toLowerCase().includes("call")
     );
     const rawPhone = phoneItem?.value;
-    const phoneNumber = "+91 9251616952";
-    const cleanPhoneForWa = "919251616952";
+    const phoneNumber = "+91 8112279728";
+    const cleanPhoneForWa = "91+91 8112279728";
 
     return (
         <section className="cta-banner-section">
@@ -68,7 +68,7 @@ export default function CTA() {
                 <div className="cta-action-group">
                     {phoneNumber && (
                         <a
-                            href="tel:+919251616952"
+                            href="tel:+91+91 8112279728"
                             className="cta-call-btn"
                         >
                             <FaPhoneAlt /> Call {phoneNumber}

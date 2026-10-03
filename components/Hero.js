@@ -38,8 +38,8 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
                         const info = Array.isArray(contactJson.data.contactInfo)
                             ? contactJson.data.contactInfo
                             : Array.isArray(contactJson.data)
-                            ? contactJson.data
-                            : [];
+                                ? contactJson.data
+                                : [];
                         setContactInfo(info);
                     }
                 }
@@ -59,8 +59,8 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
             item.label?.toLowerCase().includes("call")
     );
     const rawPhone = phoneItem?.value;
-    const phoneNumber = "+91 9251616952";
-    const cleanPhoneForWa = "919251616952";
+    const phoneNumber = "+91 8112279728";
+    const cleanPhoneForWa = "91+91 8112279728";
 
     const titleText = heroData?.title
         ? (heroData.title + (city ? " in " + city : ""))
@@ -86,7 +86,7 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
                         {phoneNumber && (
                             <a
                                 className="hero-btn-phone"
-                                href="tel:+919251616952"
+                                href="tel:+91+91 8112279728"
                             >
                                 <FaPhoneAlt /> Call {phoneNumber}
                             </a>

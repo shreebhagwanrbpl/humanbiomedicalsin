@@ -27,8 +27,8 @@ export default function Navbar() {
                         const info = Array.isArray(json.data.contactInfo)
                             ? json.data.contactInfo
                             : Array.isArray(json.data)
-                            ? json.data
-                            : [];
+                                ? json.data
+                                : [];
                         setContactInfo(info);
                     }
                 }
@@ -40,9 +40,9 @@ export default function Navbar() {
         return () => { isMounted = false; };
     }, []);
 
-    const phoneDisplay = "+91 9251616952";
-    const phoneTel = "+919251616952";
-    const phoneWa = "919251616952";
+    const phoneDisplay = "+91 8112279728";
+    const phoneTel = "+91+91 8112279728";
+    const phoneWa = "91+91 8112279728";
     const emailDisplay = "sales@humanbiomedicals.in";
 
     return (

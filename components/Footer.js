@@ -47,8 +47,8 @@ export default function Footer() {
                         const info = Array.isArray(contactJson.data.contactInfo)
                             ? contactJson.data.contactInfo
                             : Array.isArray(contactJson.data)
-                            ? contactJson.data
-                            : [];
+                                ? contactJson.data
+                                : [];
                         setContactInfo(info);
                     }
                 }
@@ -134,9 +134,9 @@ export default function Footer() {
             <div className="footer-container">
                 <div className="footer-about">
                     <div style={{ marginBottom: "16px" }}>
-      <img src="/humanlogo.png" alt="Human Biomedicals" style={{ height: "48px", width: "auto", objectFit: "contain", background: "white", padding: "4px 8px", borderRadius: "8px" }} />
-  </div>
-  <h2 style={{ fontSize: "22px" }}>Human Biomedical LLP</h2>
+                        <img src="/humanlogo.png" alt="Human Biomedicals" style={{ height: "48px", width: "auto", objectFit: "contain", background: "white", padding: "4px 8px", borderRadius: "8px" }} />
+                    </div>
+                    <h2 style={{ fontSize: "22px" }}>Human Biomedical LLP</h2>
                     <p>
                         India's trusted supplier of laboratory, diagnostic, and hospital equipment.
                         We deliver authentic biomedical solutions, installation support, calibration, AMC,
@@ -177,7 +177,7 @@ export default function Footer() {
 
                 <div className="footer-contact">
                     <h4>Contact Info</h4>
-                    <p>📞 <a href="tel:+919251616952" style={{ color: "inherit", textDecoration: "none" }}>+91 9251616952</a></p>
+                    <p>📞 <a href="tel:+91+91 8112279728" style={{ color: "inherit", textDecoration: "none" }}>+91 8112279728</a></p>
                     {email ? (
                         <p>
                             📧 <a href={`mailto:${email}`} style={{ color: "inherit", textDecoration: "none" }}>{email}</a>
