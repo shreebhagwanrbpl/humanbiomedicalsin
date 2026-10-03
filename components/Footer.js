@@ -177,7 +177,7 @@ export default function Footer() {
                     {phoneList.length > 0 ? (
                         phoneList.map((p, idx) => (
                             <p key={idx}>
-                                📞 <a href={`tel:${p.value}`} style={{ color: "inherit", textDecoration: "none" }}>{p.value}</a>
+                                📞 <a href={`tel:${Array.isArray(p.value) ? p.value[0] : p.value}`} style={{ color: "inherit", textDecoration: "none" }}>{p.value}</a>
                             </p>
                         ))
                     ) : null}

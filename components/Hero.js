@@ -81,7 +81,8 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
             item.label?.toLowerCase().includes("call") ||
             item.label?.toLowerCase().includes("contact")
     );
-    const phoneNumber = phoneItem?.value || "";
+    const rawPhone = phoneItem?.value;
+    const phoneNumber = Array.isArray(rawPhone) ? rawPhone.join(", ") : (rawPhone != null ? String(rawPhone) : "");
 
     if (loading) {
         return (

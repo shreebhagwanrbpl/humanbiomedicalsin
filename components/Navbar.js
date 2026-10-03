@@ -86,7 +86,7 @@ export default function Navbar() {
                                     {phoneList.map((p, idx) => (
                                         <span key={idx}>
                                             {idx > 0 && <span className="divider">|</span>}
-                                            <a href={`tel:${p.value}`}>{p.value}</a>
+                                            <a href={`tel:${Array.isArray(p.value) ? p.value[0] : p.value}`}>{p.value}</a>
                                         </span>
                                     ))}
                                 </span>
@@ -161,7 +161,7 @@ export default function Navbar() {
                         {phoneList.length > 0 && (
                             <div className="mobile-contact-numbers">
                                 {phoneList.map((p, idx) => (
-                                    <a key={idx} href={`tel:${p.value}`} className="phone-btn-link">
+                                    <a key={idx} href={`tel:${Array.isArray(p.value) ? p.value[0] : p.value}`} className="phone-btn-link">
                                         📞 {p.value}
                                     </a>
                                 ))}
@@ -181,8 +181,8 @@ export default function Navbar() {
                     {/* DESKTOP BUTTONS */}
                     <div className="desktop-actions">
                         {phoneList.length > 0 && (
-                            <a href={`tel:${phoneList[0].value}`} className="nav-call-btn">
-                                <FaPhoneAlt /> {phoneList[0].value}
+                            <a href={`tel:${Array.isArray(phoneList[0].value) ? phoneList[0].value[0] : phoneList[0].value}`} className="nav-call-btn">
+                                <FaPhoneAlt /> {Array.isArray(phoneList[0].value) ? phoneList[0].value.join(", ") : phoneList[0].value}
                             </a>
                         )}
                         <Link

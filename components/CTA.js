@@ -57,8 +57,9 @@ export default function CTA() {
             item.label?.toLowerCase().includes("call") ||
             item.label?.toLowerCase().includes("contact")
     );
-    const phoneNumber = phoneItem?.value || "";
-    const cleanPhoneForWa = phoneNumber.replace(/[^0-9]/g, "");
+    const rawPhone = phoneItem?.value;
+    const phoneNumber = Array.isArray(rawPhone) ? rawPhone.join(", ") : (rawPhone != null ? String(rawPhone) : "");
+    const cleanPhoneForWa = phoneNumber ? String(phoneNumber).replace(/[^0-9]/g, "") : "";
 
     return (
         <section className="cta-section">

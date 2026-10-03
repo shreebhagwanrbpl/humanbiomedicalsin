@@ -146,7 +146,7 @@ export default function ContactClient({ contactInfo = [], districtData = null, c
                                     {phoneList.map((p, idx) => (
                                         <a
                                             key={idx}
-                                            href={`tel:${p.value}`}
+                                            href={`tel:${Array.isArray(p.value) ? p.value[0] : p.value}`}
                                             style={{ color: "#0f4c81", fontWeight: "600", textDecoration: "none" }}
                                         >
                                             {p.value}

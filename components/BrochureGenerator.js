@@ -158,7 +158,7 @@ export default function BrochureGenerator({ product, selectedImage, contactInfo 
                                         item.label?.toLowerCase().includes("contact")
                                 );
                                 const phoneDisplay = phoneList.length > 0
-                                    ? phoneList.map((p) => p.value).join(", ")
+                                    ? phoneList.map((p) => Array.isArray(p.value) ? p.value.join(", ") : p.value).join(", ")
                                     : "";
 
                                 return phoneDisplay ? (

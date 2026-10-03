@@ -4,6 +4,28 @@ import { fetchSiteData, ADMIN_API_BASE_URL, WEBSITE_ID } from "@/lib/admin-api";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function normalizeContactData(data) {
+  if (!data) return data;
+  if (Array.isArray(data)) {
+    return data.map(item => {
+      if (!item) return item;
+      const val = Array.isArray(item.value) ? item.value.join(", ") : (item.value != null ? String(item.value) : "");
+      return { ...item, value: val };
+    });
+  }
+  if (Array.isArray(data.contactInfo)) {
+    return {
+      ...data,
+      contactInfo: data.contactInfo.map(item => {
+        if (!item) return item;
+        const val = Array.isArray(item.value) ? item.value.join(", ") : (item.value != null ? String(item.value) : "");
+        return { ...item, value: val };
+      })
+    };
+  }
+  return data;
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -20,7 +42,10 @@ export async function GET(request) {
       );
     }
 
-    const data = await fetchSiteData(type, { district });
+    let data = await fetchSiteData(type, { district });
+    if (type === "contact" || data?.contactInfo) {
+      data = normalizeContactData(data);
+    }
 
     return NextResponse.json(
       {
