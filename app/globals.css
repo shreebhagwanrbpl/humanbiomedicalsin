@@ -1,68 +1,98 @@
-/* =========================
-   RESET
-========================= */
+@import "../components/Navbar.css";
+@import "../components/Hero.css";
+@import "../components/Stats.css";
+@import "../components/FeaturedProducts.css";
+@import "../components/WhyChooseUs.css";
+@import "../components/CTA.css";
+@import "../components/BrochureGenerator.css";
 
+/* ==========================================================================
+   GLOBAL DESIGN TOKENS & RESET
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+:root {
+    --primary: #0f4c81;
+    --primary-hover: #0a355c;
+    --primary-light: #e8f3ff;
+    --secondary: #00a8cc;
+    --secondary-hover: #008fae;
+    --accent: #e08c2a;
+    --accent-hover: #c7771e;
+    --success: #10b981;
+    --dark: #0f172a;
+    --slate: #334155;
+    --muted: #64748b;
+    --light-bg: #f8fafc;
+    --border: #e2e8f0;
+    --card-shadow: 0 10px 30px rgba(15, 76, 129, 0.08);
+    --card-shadow-hover: 0 20px 40px rgba(15, 76, 129, 0.14);
+}
+
 html,
 body {
     width: 100%;
     overflow-x: clip;
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: #ffffff;
-    color: #0f172a;
+    color: var(--dark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 a {
     text-decoration: none;
     color: inherit;
+    transition: all 0.2s ease;
 }
 
 img {
     max-width: 100%;
+    height: auto;
     display: block;
 }
 
 button {
     cursor: pointer;
     border: none;
+    outline: none;
     font-family: inherit;
 }
-
-/* =========================
-   MAIN CONTENT
-========================= */
-
-main {
-    width: 100%;
-}
-
-/* =========================
-   COMMON CONTAINER
-========================= */
 
 .container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 60px 40px;
+    padding: 60px 24px;
 }
 
-/* =========================
-   FORM ELEMENTS
-========================= */
-
+/* ==========================================================================
+   FORM CONTROLS
+   ========================================================================== */
 input,
 textarea,
 select {
     width: 100%;
-    padding: 14px;
-    border: 1px solid #dbe2ea;
-    border-radius: 8px;
+    padding: 14px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
     outline: none;
+    font-size: 15px;
+    background: #ffffff;
+    color: var(--dark);
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(15, 76, 129, 0.12);
 }
 
 textarea {
@@ -70,97 +100,93 @@ textarea {
     min-height: 120px;
 }
 
-/* =========================
-   FOOTER
-========================= */
+/* ==========================================================================
+   FOOTER COMPONENT
+   ========================================================================== */
 .footer {
-    background: linear-gradient(135deg,
-            #0f4c81 0%,
-            #146ca4 50%,
-            #00a8cc 100%);
-
-    color: white;
-    padding-top: 70px;
+    background: linear-gradient(135deg, #092742 0%, #0f4c81 60%, #007a99 100%);
+    color: #ffffff;
+    padding-top: 80px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer-container {
     max-width: 1400px;
     margin: 0 auto;
-
-    padding: 0 40px 50px;
-
+    padding: 0 32px 60px;
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1.2fr;
     gap: 60px;
 }
 
-.footer h2 {
-    font-size: 32px;
-    margin-bottom: 18px;
+.footer-brand h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    color: #ffffff;
 }
 
-.footer h4 {
-    font-size: 20px;
-    margin-bottom: 20px;
-}
-
-.footer p,
-.footer li {
-    color: rgba(255, 255, 255, 0.9);
+.footer-brand p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 15px;
     line-height: 1.8;
-    font-size: 16px;
+    max-width: 480px;
 }
 
-/* LINKS */
+.footer-links h4,
+.footer-contact h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #bae6fd;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
 
-.footer ul {
+.footer-links ul {
     list-style: none;
-    padding: 0;
-    margin: 0;
 }
 
-.footer li {
+.footer-links li {
     margin-bottom: 12px;
 }
 
-.footer li a {
-    color: rgba(255, 255, 255, 0.9);
-    text-decoration: none;
-
-    transition: all 0.3s ease;
-
+.footer-links li a {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 15px;
     display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
 }
 
-.footer li a:hover {
-    color: white;
+.footer-links li a:hover {
+    color: #38bdf8;
     transform: translateX(6px);
 }
 
-/* CONTACT LINKS */
+.footer-contact p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 14px;
+    font-size: 15px;
+    line-height: 1.7;
+}
 
 .footer-contact a {
-    color: rgba(255, 255, 255, 0.9);
+    color: inherit;
     text-decoration: none;
 }
 
 .footer-contact a:hover {
-    color: white;
+    color: #38bdf8;
 }
-
-/* BOTTOM */
 
 .footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
     text-align: center;
-
-    padding: 25px;
-
-    color: rgba(255, 255, 255, 0.8);
+    padding: 24px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
 }
-
-/* TABLET */
 
 @media (max-width: 992px) {
     .footer-container {
@@ -169,94 +195,25 @@ textarea {
     }
 }
 
-/* MOBILE */
-
 @media (max-width: 768px) {
-    .footer {
-        text-align: center;
-    }
-
     .footer-container {
         grid-template-columns: 1fr;
-
         padding: 0 20px 40px;
-
         gap: 35px;
-    }
-
-    .footer li a:hover {
-        transform: none;
     }
 }
 
+/* ==========================================================================
+   SKELETON LOADERS
+   ========================================================================== */
 .skeleton {
-    background: linear-gradient(90deg,
-            #f0f0f0 25%,
-            #e5e5e5 50%,
-            #f0f0f0 75%);
-
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
     background-size: 200% 100%;
-
     animation: shimmer 1.5s infinite;
-
     border-radius: 8px;
 }
 
 @keyframes shimmer {
-
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
-}
-
-.footer-title-loader {
-    width: 220px;
-    height: 38px;
-    margin-bottom: 20px;
-}
-
-.footer-text-loader {
-    width: 100%;
-    height: 14px;
-    margin-bottom: 10px;
-}
-
-.footer-text-loader.short {
-    width: 70%;
-}
-
-.footer-heading-loader {
-    width: 140px;
-    height: 24px;
-    margin-bottom: 20px;
-}
-
-.footer-link-loader {
-    width: 100px;
-    height: 14px;
-    margin-bottom: 14px;
-}
-
-.footer-contact-loader {
-    width: 100%;
-    height: 14px;
-    margin-bottom: 14px;
-}
-
-.footer-bottom-loader {
-    width: 260px;
-    height: 14px;
-    margin: 0 auto;
-}
-
-.react-hot-toast {
-    z-index: 999999 !important;
-}
-
-[data-hot-toast] {
-    z-index: 999999 !important;
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }

@@ -3,50 +3,29 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import "./Hero.css";
+import { FaPhoneAlt, FaWhatsapp, FaCheckCircle, FaAward, FaShieldAlt, FaMicroscope } from "react-icons/fa";
 
 export default function Hero({ heroData: initialHeroData, city: propCity, district: propDistrict }) {
     const [heroData, setHeroData] = useState(initialHeroData || null);
     const [contactInfo, setContactInfo] = useState([]);
-    const [loading, setLoading] = useState(!initialHeroData);
 
     const pathname = usePathname();
-
-    const pathParts = pathname
-        .split("/")
-        .filter(Boolean);
-
-    const staticRoutes = [
-        "about",
-        "items",
-        "services",
-        "contact"
-    ];
-
-    const clientDistrict =
-        pathParts[0] &&
-            !staticRoutes.includes(pathParts[0])
-            ? pathParts[0]
-            : "";
-
-    const clientCity = clientDistrict
-        ? clientDistrict
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, (c) => c.toUpperCase())
-        : "";
-
-    const district = propDistrict !== undefined ? propDistrict : clientDistrict;
-    const city = propCity !== undefined ? propCity : clientCity;
+    const pathParts = pathname.split("/").filter(Boolean);
+    const staticRoutes = ["about", "items", "services", "contact"];
+    const district = propDistrict || (pathParts[0] && !staticRoutes.includes(pathParts[0]) ? pathParts[0] : "");
+    const city = propCity || (district ? district.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "");
+    const prefix = district ? `/${district}` : "";
 
     useEffect(() => {
+        let isMounted = true;
         const fetchHeroAndContact = async () => {
             try {
                 if (!initialHeroData) {
                     const res = await fetch("/api/site-data?type=home");
                     if (res.ok) {
                         const json = await res.json();
-                        if (json?.data) {
+                        if (isMounted && json?.data) {
                             setHeroData(json.data);
                         }
                     }
@@ -55,7 +34,7 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
                 const contactRes = await fetch("/api/site-data?type=contact");
                 if (contactRes.ok) {
                     const contactJson = await contactRes.json();
-                    if (contactJson?.data) {
+                    if (isMounted && contactJson?.data) {
                         const info = Array.isArray(contactJson.data.contactInfo)
                             ? contactJson.data.contactInfo
                             : Array.isArray(contactJson.data)
@@ -65,119 +44,108 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
                     }
                 }
             } catch (err) {
-                console.error("Error fetching hero/contact data:", err);
-            } finally {
-                setLoading(false);
+                // Silently ignore
             }
         };
 
         fetchHeroAndContact();
+        return () => { isMounted = false; };
     }, [initialHeroData]);
 
     const phoneItem = contactInfo.find(
         (item) =>
             item.label?.toLowerCase().includes("phone") ||
             item.label?.toLowerCase().includes("mobile") ||
-            item.label?.toLowerCase().includes("call") ||
-            item.label?.toLowerCase().includes("contact")
+            item.label?.toLowerCase().includes("call")
     );
     const rawPhone = phoneItem?.value;
-    const phoneNumber = Array.isArray(rawPhone) ? rawPhone.join(", ") : (rawPhone != null ? String(rawPhone) : "");
-
-    if (loading) {
-        return (
-            <section className="hero">
-                <div className="hero-left">
-                    <span className="hero-badge"></span>
-                    <h1></h1>
-                    <div className="skeleton text-loader"></div>
-                    <div className="skeleton text-loader"></div>
-                    <div className="skeleton text-loader small"></div>
-                    <div className="hero-buttons">
-                        <div className="skeleton btn-loader"></div>
-                        <div className="skeleton btn-loader"></div>
-                    </div>
-                </div>
-                <div className="hero-right">
-                    <div className="skeleton image-loader"></div>
-                </div>
-            </section>
-        );
-    }
+    const phoneNumber = Array.isArray(rawPhone) ? rawPhone[0] : (rawPhone != null ? String(rawPhone) : "9251616952");
+    const cleanPhoneForWa = phoneNumber ? String(phoneNumber).replace(/[^0-9]/g, "") : "9251616952";
 
     const titleText = heroData?.title
-        ? `${heroData.title}${city ? ` In ${city}` : ""}`
-        : (city ? `Biomedical Equipment Supplier In ${city}` : "");
+        ? (heroData.title + (city ? " in " + city : ""))
+        : (city ? "Precision Diagnostic Systems & Laboratory Equipment in " + city : "Precision Diagnostic Systems, Clinical Analyzers & Laboratory Instruments");
+
+    const descriptionText = heroData?.description ||
+        "Discover our extensive selection of clinical laboratory analyzers, diagnostic test kits, and medical instrumentation. Human Biomedicals ensures accurate test results, unmatched equipment reliability, and dedicated nationwide service.";
 
     return (
-        <section className="hero">
-            <div className="hero-left">
-                <span className="hero-badge">
-                    🏆 India's Leading Biomedical Equipment Supplier
-                </span>
+        <section className="hero-section">
+            <div className="hero-container">
+                {/* Left Content */}
+                <div className="hero-left">
+                    <div className="hero-badge-pill">
+                        <FaAward className="badge-icon" /> India's Leading Biomedical Equipment Supplier
+                    </div>
 
-                {titleText && <h1>{titleText}</h1>}
+                    <h1 className="hero-title">{titleText}</h1>
 
-                {heroData?.description && <p>{heroData.description}</p>}
+                    <p className="hero-description">{descriptionText}</p>
 
-                <div className="hero-buttons">
-                    {phoneNumber && (
-                        <a
-                            className="hero-call-btn"
-                            href={`tel:${phoneNumber}`}
-                        >
-                            📞 Call {phoneNumber}
-                        </a>
-                    )}
+                    <div className="hero-action-buttons">
+                        {phoneNumber && (
+                            <a
+                                className="hero-btn-phone"
+                                href={`tel:${phoneNumber}`}
+                            >
+                                <FaPhoneAlt /> Call {phoneNumber}
+                            </a>
+                        )}
 
-                    {heroData?.button1Text && (
+                        {cleanPhoneForWa && (
+                            <a
+                                className="hero-btn-wa"
+                                href={`https://wa.me/${cleanPhoneForWa}?text=Hello%20Human%20Biomedicals,%20I%20want%20to%20enquire%20about%20biomedical%20equipment.`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <FaWhatsapp /> WhatsApp Us
+                            </a>
+                        )}
+
                         <Link
-                            className="primary-btn"
-                            href={district ? `/${district}/contact` : "/contact"}
+                            className="hero-btn-catalog"
+                            href={`${prefix}/items`}
                         >
-                            {heroData.button1Text}
+                            <FaMicroscope /> View Products
                         </Link>
-                    )}
+                    </div>
 
-                    {heroData?.button2Text && (
-                        <Link
-                            className="secondary-btn"
-                            href={district ? `/${district}/items` : "/items"}
-                        >
-                            {heroData.button2Text}
-                        </Link>
-                    )}
+                    <div className="hero-feature-pills">
+                        <div className="feature-pill">
+                            <FaCheckCircle className="pill-icon" /> 100% Genuine Certified
+                        </div>
+                        <div className="feature-pill">
+                            <FaCheckCircle className="pill-icon" /> Express PAN-India Dispatch
+                        </div>
+                        <div className="feature-pill">
+                            <FaShieldAlt className="pill-icon" /> Warranty & AMC Support
+                        </div>
+                    </div>
                 </div>
 
-                <div className="hero-features">
-                    <div className="feature-item">
-                        ✓ Genuine Certified Brands
-                    </div>
-                    <div className="feature-item">
-                        ✓ Express Delivery
-                    </div>
-                    <div className="feature-item">
-                        ✓ Technical Assistance
-                    </div>
-                </div>
-            </div>
+                {/* Right Image Showcase */}
+                <div className="hero-right">
+                    <div className="hero-image-card">
+                        <div className="hero-image-wrapper">
+                            <img
+                                src={heroData?.imageUrl || "/biomedical-hero.jpg"}
+                                alt="Biomedical Equipment Laboratory Analyzer"
+                                className="hero-main-img"
+                                loading="eager"
+                            />
+                        </div>
 
-            <div className="hero-right">
-                <div className="hero-image-box">
-                    <Image
-                        src={
-                            heroData?.imageUrl ||
-                            "/biomedical-hero.jpg"
-                        }
-                        alt="Biomedical Equipment Laboratory Analyzer"
-                        fill
-                        sizes="(max-width: 992px) 100vw, 50vw"
-                        priority
-                        style={{ objectFit: "cover", borderRadius: "20px" }}
-                    />
-                    <div className="hero-floating-card">
-                        <span className="card-number">100%</span>
-                        <span className="card-label">Certified Equipment</span>
+                        {/* Floating Trust Badges */}
+                        <div className="floating-badge badge-top-right">
+                            <span className="badge-val">100%</span>
+                            <span className="badge-lbl">Certified Equipment</span>
+                        </div>
+
+                        <div className="floating-badge badge-bottom-left">
+                            <span className="badge-val">24/7</span>
+                            <span className="badge-lbl">Engineer Support</span>
+                        </div>
                     </div>
                 </div>
             </div>

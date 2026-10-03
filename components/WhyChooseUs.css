@@ -1,28 +1,103 @@
-.why-section {
-    padding: 100px 20px;
+.why-us-section {
+    padding: 90px 24px;
+    background: #f8fafc;
 }
 
-.why-header {
+.why-us-header {
     text-align: center;
-    margin-bottom: 60px;
+    max-width: 760px;
+    margin: 0 auto 55px;
 }
 
-.why-header h2 {
-    font-size: 42px;
+.why-us-badge {
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 50px;
+    margin-bottom: 16px;
+    letter-spacing: 0.06em;
 }
 
-.why-grid {
-    max-width: 1300px;
-    margin: auto;
+.why-us-header h2 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
 
+.why-us-header p {
+    font-size: 17px;
+    color: #64748b;
+    line-height: 1.65;
+}
+
+.why-us-grid {
+    max-width: 1400px;
+    margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 25px;
 }
 
-.why-card {
-    background: #fff;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, .08);
+.why-benefit-card {
+    background: #ffffff;
+    padding: 35px 26px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(15, 76, 129, 0.06);
+    border: 1px solid #e2e8f0;
+    border-top: 4px solid #0f4c81;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.why-benefit-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(15, 76, 129, 0.12);
+}
+
+.benefit-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: #e0f2fe;
+    color: #0f4c81;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 22px;
+}
+
+.why-benefit-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+}
+
+.why-benefit-card p {
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+    .why-us-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .why-us-section {
+        padding: 60px 16px;
+    }
+    .why-us-header h2 {
+        font-size: 28px;
+    }
+    .why-us-grid {
+        grid-template-columns: 1fr;
+    }
 }

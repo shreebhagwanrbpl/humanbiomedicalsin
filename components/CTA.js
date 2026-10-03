@@ -4,36 +4,25 @@ import "./CTA.css";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
+import { FaPhoneAlt, FaWhatsapp, FaArrowRight, FaShieldAlt } from "react-icons/fa";
 
 export default function CTA() {
     const [contactInfo, setContactInfo] = useState([]);
     const pathname = usePathname();
 
-    const pathParts = pathname
-        .split("/")
-        .filter(Boolean);
-
-    const staticRoutes = [
-        "about",
-        "items",
-        "services",
-        "contact"
-    ];
-
-    const district =
-        pathParts[0] &&
-            !staticRoutes.includes(pathParts[0])
-            ? pathParts[0]
-            : "";
+    const pathParts = pathname.split("/").filter(Boolean);
+    const staticRoutes = ["about", "items", "services", "contact"];
+    const district = pathParts[0] && !staticRoutes.includes(pathParts[0]) ? pathParts[0] : "";
+    const prefix = district ? `/${district}` : "";
 
     useEffect(() => {
+        let isMounted = true;
         const loadContact = async () => {
             try {
                 const res = await fetch("/api/site-data?type=contact");
                 if (res.ok) {
                     const json = await res.json();
-                    if (json?.data) {
+                    if (isMounted && json?.data) {
                         const info = Array.isArray(json.data.contactInfo)
                             ? json.data.contactInfo
                             : Array.isArray(json.data)
@@ -48,37 +37,35 @@ export default function CTA() {
         };
 
         loadContact();
+        return () => { isMounted = false; };
     }, []);
 
     const phoneItem = contactInfo.find(
         (item) =>
             item.label?.toLowerCase().includes("phone") ||
             item.label?.toLowerCase().includes("mobile") ||
-            item.label?.toLowerCase().includes("call") ||
-            item.label?.toLowerCase().includes("contact")
+            item.label?.toLowerCase().includes("call")
     );
     const rawPhone = phoneItem?.value;
-    const phoneNumber = Array.isArray(rawPhone) ? rawPhone.join(", ") : (rawPhone != null ? String(rawPhone) : "");
-    const cleanPhoneForWa = phoneNumber ? String(phoneNumber).replace(/[^0-9]/g, "") : "";
+    const phoneNumber = Array.isArray(rawPhone) ? rawPhone[0] : (rawPhone != null ? String(rawPhone) : "9251616952");
+    const cleanPhoneForWa = phoneNumber ? String(phoneNumber).replace(/[^0-9]/g, "") : "9251616952";
 
     return (
-        <section className="cta-section">
-            <div className="cta-content">
-                <span className="cta-badge">
-                    Human Biomedical LLP
+        <section className="cta-banner-section">
+            <div className="cta-banner-card">
+                <span className="cta-trust-badge">
+                    <FaShieldAlt style={{ marginRight: 6 }} /> Human Biomedical LLP
                 </span>
 
-                <h2>
+                <h2 className="cta-headline">
                     Looking For Reliable Biomedical Equipment?
                 </h2>
 
-                <p>
-                    Get high-quality laboratory analyzers, diagnostic systems,
-                    hospital instruments and biomedical equipment with expert installation,
-                    warranty support, and competitive pricing across India.
+                <p className="cta-subtext">
+                    Get high-quality laboratory analyzers, diagnostic systems, hospital instruments, and consumables with expert on-site installation, warranty support, and competitive pricing across India.
                 </p>
 
-                <div className="cta-buttons">
+                <div className="cta-action-group">
                     {phoneNumber && (
                         <a
                             href={`tel:${phoneNumber}`}
@@ -93,30 +80,22 @@ export default function CTA() {
                             href={`https://wa.me/${cleanPhoneForWa}?text=Hello%20Human%20Biomedical%20LLP,%20I%20want%20to%20enquire%20about%20biomedical%20equipment.`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="cta-whatsapp-btn"
+                            className="cta-wa-btn"
                         >
                             <FaWhatsapp /> WhatsApp Us
                         </a>
                     )}
 
                     <Link
-                        href={
-                            district
-                                ? `/${district}/items`
-                                : "/items"
-                        }
-                        className="cta-primary"
+                        href={`${prefix}/items`}
+                        className="cta-primary-btn"
                     >
-                        View Products
+                        View Products <FaArrowRight />
                     </Link>
 
                     <Link
-                        href={
-                            district
-                                ? `/${district}/contact`
-                                : "/contact"
-                        }
-                        className="cta-secondary"
+                        href={`${prefix}/contact`}
+                        className="cta-secondary-btn"
                     >
                         Contact Us
                     </Link>

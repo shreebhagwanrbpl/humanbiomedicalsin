@@ -4,85 +4,68 @@ import { usePathname } from "next/navigation";
 import "./FeaturedProducts.css";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { FaArrowRight, FaTag, FaCheckCircle } from "react-icons/fa";
 
-export default function FeaturedProducts({ initialProducts = [] }) {
-    const [products, setProducts] = useState(initialProducts.slice(0, 4));
-    const [loading, setLoading] = useState(initialProducts.length === 0);
+export default function FeaturedProducts({ initialProducts = [], products: propProducts = [] }) {
+    const initialList = propProducts.length > 0 ? propProducts : initialProducts;
+    const [products, setProducts] = useState(initialList.slice(0, 4));
+    const [loading, setLoading] = useState(initialList.length === 0);
 
     const pathname = usePathname();
-
     const pathParts = pathname.split("/").filter(Boolean);
     const staticRoutes = ["about", "items", "services", "contact"];
-
-    const district =
-        pathParts[0] && !staticRoutes.includes(pathParts[0])
-            ? pathParts[0]
-            : "";
+    const district = pathParts[0] && !staticRoutes.includes(pathParts[0]) ? pathParts[0] : "";
+    const prefix = district ? `/${district}` : "";
 
     useEffect(() => {
         let isMounted = true;
-
-        const loadFeatured = async () => {
-            try {
-                const res = await fetch("/api/products", { cache: "no-store" });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (isMounted && data.products && data.products.length > 0) {
-                        setProducts(data.products.slice(0, 4));
+        if (initialList.length === 0) {
+            const loadFeatured = async () => {
+                try {
+                    const res = await fetch("/api/products");
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (isMounted && data.products && data.products.length > 0) {
+                            setProducts(data.products.slice(0, 4));
+                        }
                     }
+                } catch (err) {
+                    // Silently ignore
+                } finally {
+                    if (isMounted) setLoading(false);
                 }
-            } catch (err) {
-                console.error("Error loading featured products:", err);
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-
-        loadFeatured();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
-    if (loading && products.length === 0) {
-        return (
-            <section className="featured-products" key={pathname}>
-                <h2>Featured Biomedical Products</h2>
-                <div className="products-grid">
-                    {[1, 2, 3, 4].map((item) => (
-                        <div className="product-card" key={item}>
-                            <div className="skeleton featured-image-loader"></div>
-                            <div className="product-content">
-                                <div className="skeleton featured-title-loader"></div>
-                                <div className="skeleton featured-text-loader"></div>
-                                <div className="skeleton featured-text-loader short"></div>
-                                <div className="skeleton featured-btn-loader"></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        );
-    }
-
-    if (products.length === 0) {
-        return null;
-    }
+            };
+            loadFeatured();
+        } else {
+            setLoading(false);
+        }
+        return () => { isMounted = false; };
+    }, [initialList]);
 
     return (
-        <section className="featured-products" key={pathname}>
-            <h2>Featured Biomedical Products</h2>
+        <section className="featured-section">
+            <div className="section-header">
+                <span className="section-sub-badge">PREMIUM DIAGNOSTIC SYSTEMS</span>
+                <h2 className="section-main-title">Featured Biomedical Products</h2>
+                <p className="section-subtitle">
+                    Explore top-tier laboratory analyzers, hematology counters, and diagnostic instruments supplied across India.
+                </p>
+            </div>
 
-            <div className="products-grid">
+            <div className="products-grid-container">
                 {products.map((product, index) => {
-                    const imgUrl = product.images?.[0] || product.image || "/placeholder-product.jpg";
+                    const imgUrl = product.images?.[0] || product.image || "/biomedical-hero.jpg";
                     return (
                         <div
-                            className="product-card"
-                            key={`${product.slug || product.id || "product"}-${index}`}
+                            className="modern-product-card"
+                            key={(product.slug || product.id || "prod") + "-" + index}
                         >
-                            <div className="product-image">
+                            <div className="product-card-top">
+                                <span className="category-pill">{product.category || "Biomedical"}</span>
+                                <span className="stock-pill"><FaCheckCircle /> Certified</span>
+                            </div>
+
+                            <div className="product-image-box">
                                 <img
                                     src={imgUrl}
                                     alt={product.title}
@@ -90,32 +73,31 @@ export default function FeaturedProducts({ initialProducts = [] }) {
                                 />
                             </div>
 
-                            <div className="product-content">
-                                <h3>{product.title}</h3>
+                            <div className="product-card-body">
+                                <h3 className="product-title">{product.title}</h3>
 
-                                <div className="product-meta">
-                                    <p>
-                                        <strong>Brand:</strong> {product.brand || "Human Biomedicals"}
-                                    </p>
-                                    <p>
-                                        <strong>Model:</strong> {product.model || "Standard"}
-                                    </p>
-                                    {product.price && (
-                                        <p style={{ color: "#059669", fontWeight: "700" }}>
-                                            <strong>Price:</strong> ₹{product.price}
-                                        </p>
-                                    )}
+                                <div className="product-specs">
+                                    <div className="spec-row">
+                                        <span className="spec-lbl">Brand:</span>
+                                        <span className="spec-val">{product.brand || "Human Biomedical"}</span>
+                                    </div>
+                                    <div className="spec-row">
+                                        <span className="spec-lbl">Model:</span>
+                                        <span className="spec-val">{product.model || "Standard"}</span>
+                                    </div>
                                 </div>
 
+                                {product.price && (
+                                    <div className="product-price-tag">
+                                        <FaTag /> ₹{product.price}
+                                    </div>
+                                )}
+
                                 <Link
-                                    href={
-                                        district
-                                            ? `/${district}/items/${product.slug}`
-                                            : `/items/${product.slug}`
-                                    }
-                                    className="product-btn"
+                                    href={`${prefix}/items/${product.slug}`}
+                                    className="product-action-btn"
                                 >
-                                    View Details
+                                    View Details <FaArrowRight />
                                 </Link>
                             </div>
                         </div>
@@ -123,12 +105,12 @@ export default function FeaturedProducts({ initialProducts = [] }) {
                 })}
             </div>
 
-            <div className="view-all-btn-wrap">
+            <div className="catalog-btn-wrapper">
                 <Link
-                    href={district ? `/${district}/items` : "/items"}
-                    className="view-all-btn"
+                    href={`${prefix}/items`}
+                    className="view-catalog-btn"
                 >
-                    View All Products
+                    Explore Complete Catalog ({products.length > 0 ? "104+ Products" : "All Products"}) <FaArrowRight />
                 </Link>
             </div>
         </section>
