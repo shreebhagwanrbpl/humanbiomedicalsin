@@ -388,34 +388,7 @@ export default function ProductsClient({
                                                             <div className="product-row-content">
                                                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", flexWrap: "wrap" }}>
                                                                     <h3 style={{ margin: 0 }}>{product.title}</h3>
-                                                                    {product.price && (
-                                                                        <span style={{ fontSize: "14px", fontWeight: "700", color: "#059669", background: "#ecfdf5", padding: "2px 8px", borderRadius: "6px" }}>
-                                                                            ₹{product.price}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-
-                                                                <p>
-                                                                    {product.description ||
-                                                                        product.desc ||
-                                                                        "Premium biomedical equipment designed for hospitals, laboratories and healthcare institutions."}
-                                                                </p>
-
-                                                                <div className="product-info-grid">
-                                                                    <div className="info-box">
-                                                                        <span>Brand</span>
-                                                                        <strong>{product.brand || "Human Biomedicals"}</strong>
-                                                                    </div>
-                                                                    <div className="info-box">
-                                                                        <span>Model</span>
-                                                                        <strong>{product.model || "Standard"}</strong>
-                                                                    </div>
-                                                                    {product.instrument && (
-                                                                        <div className="info-box">
-                                                                            <span>Instrument</span>
-                                                                            <strong>{product.instrument}</strong>
-                                                                        </div>
-                                                                    )}
+                                                                    
                                                                     {product.capacity && (
                                                                         <div className="info-box">
                                                                             <span>Capacity</span>

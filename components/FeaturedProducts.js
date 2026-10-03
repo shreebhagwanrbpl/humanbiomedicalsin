@@ -87,14 +87,10 @@ export default function FeaturedProducts({ initialProducts = [], products: propP
                                     </div>
                                 </div>
 
-                                {product.price && (
-                                    <div className="product-price-tag">
-                                        <FaTag /> ₹{product.price}
-                                    </div>
-                                )}
+                                
 
                                 <Link
-                                    href={`${prefix}/items/${product.slug}`}
+                                    href={`${prefix}/items/${encodeURIComponent(product.slug || product.id)}`}
                                     className="product-action-btn"
                                 >
                                     View Details <FaArrowRight />

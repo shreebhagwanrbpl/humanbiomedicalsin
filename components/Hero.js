@@ -59,8 +59,8 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
             item.label?.toLowerCase().includes("call")
     );
     const rawPhone = phoneItem?.value;
-    const phoneNumber = Array.isArray(rawPhone) ? rawPhone[0] : (rawPhone != null ? String(rawPhone) : "9251616952");
-    const cleanPhoneForWa = phoneNumber ? String(phoneNumber).replace(/[^0-9]/g, "") : "9251616952";
+    const phoneNumber = "+91 9251616952";
+    const cleanPhoneForWa = "919251616952";
 
     const titleText = heroData?.title
         ? (heroData.title + (city ? " in " + city : ""))
@@ -86,7 +86,7 @@ export default function Hero({ heroData: initialHeroData, city: propCity, distri
                         {phoneNumber && (
                             <a
                                 className="hero-btn-phone"
-                                href={`tel:${phoneNumber}`}
+                                href="tel:+919251616952"
                             >
                                 <FaPhoneAlt /> Call {phoneNumber}
                             </a>

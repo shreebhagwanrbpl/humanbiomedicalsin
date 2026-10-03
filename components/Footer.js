@@ -133,7 +133,10 @@ export default function Footer() {
         <footer className="footer">
             <div className="footer-container">
                 <div className="footer-about">
-                    <h2>Human Biomedical LLP</h2>
+                    <div style={{ marginBottom: "16px" }}>
+      <img src="/humanlogo.png" alt="Human Biomedicals" style={{ height: "48px", width: "auto", objectFit: "contain", background: "white", padding: "4px 8px", borderRadius: "8px" }} />
+  </div>
+  <h2 style={{ fontSize: "22px" }}>Human Biomedical LLP</h2>
                     <p>
                         India's trusted supplier of laboratory, diagnostic, and hospital equipment.
                         We deliver authentic biomedical solutions, installation support, calibration, AMC,
@@ -174,13 +177,7 @@ export default function Footer() {
 
                 <div className="footer-contact">
                     <h4>Contact Info</h4>
-                    {phoneList.length > 0 ? (
-                        phoneList.map((p, idx) => (
-                            <p key={idx}>
-                                📞 <a href={`tel:${Array.isArray(p.value) ? p.value[0] : p.value}`} style={{ color: "inherit", textDecoration: "none" }}>{p.value}</a>
-                            </p>
-                        ))
-                    ) : null}
+                    <p>📞 <a href="tel:+919251616952" style={{ color: "inherit", textDecoration: "none" }}>+91 9251616952</a></p>
                     {email ? (
                         <p>
                             📧 <a href={`mailto:${email}`} style={{ color: "inherit", textDecoration: "none" }}>{email}</a>

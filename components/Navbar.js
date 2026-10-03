@@ -40,18 +40,10 @@ export default function Navbar() {
         return () => { isMounted = false; };
     }, []);
 
-    const phoneItem = contactInfo.find(
-        (item) =>
-            item.label?.toLowerCase().includes("phone") ||
-            item.label?.toLowerCase().includes("mobile") ||
-            item.label?.toLowerCase().includes("call")
-    );
-    const rawPhone = phoneItem?.value;
-    const phoneDisplay = Array.isArray(rawPhone) ? rawPhone[0] : (rawPhone != null ? String(rawPhone) : "9251616952");
-    const cleanPhone = phoneDisplay.replace(/[^0-9]/g, "");
-
-    const emailItem = contactInfo.find((item) => item.label?.toLowerCase().includes("email"));
-    const emailDisplay = emailItem?.value || "sales@humanbiomedicals.in";
+    const phoneDisplay = "+91 9251616952";
+    const phoneTel = "+919251616952";
+    const phoneWa = "919251616952";
+    const emailDisplay = "sales@humanbiomedicals.in";
 
     return (
         <header className="site-header">
@@ -66,26 +58,20 @@ export default function Navbar() {
                     </div>
 
                     <div className="top-right">
-                        {phoneDisplay && (
-                            <a href={`tel:${phoneDisplay}`} className="top-link">
-                                <FaPhoneAlt /> {phoneDisplay}
-                            </a>
-                        )}
-                        {emailDisplay && (
-                            <a href={`mailto:${emailDisplay}`} className="top-link">
-                                <FaEnvelope /> {emailDisplay}
-                            </a>
-                        )}
-                        {cleanPhone && (
-                            <a
-                                href={`https://wa.me/${cleanPhone}?text=Hello%20Human%20Biomedicals,%20I%20am%20interested%20in%20biomedical%20equipment.`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="top-wa-btn"
-                            >
-                                <FaWhatsapp /> WhatsApp
-                            </a>
-                        )}
+                        <a href={`tel:${phoneTel}`} className="top-link">
+                            <FaPhoneAlt /> {phoneDisplay}
+                        </a>
+                        <a href={`mailto:${emailDisplay}`} className="top-link">
+                            <FaEnvelope /> {emailDisplay}
+                        </a>
+                        <a
+                            href={`https://wa.me/${phoneWa}?text=Hello%20Human%20Biomedicals,%20I%20want%20to%20enquire%20about%20biomedical%20equipment.`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="top-wa-btn"
+                        >
+                            <FaWhatsapp /> WhatsApp
+                        </a>
                     </div>
                 </div>
             </div>
@@ -93,12 +79,12 @@ export default function Navbar() {
             {/* Main Navbar */}
             <nav className="main-nav">
                 <div className="nav-container">
-                    <Link href={prefix || "/"} className="brand-logo">
-                        <div className="brand-icon">HB</div>
-                        <div className="brand-text">
-                            <span className="brand-title">HUMAN BIOMEDICAL</span>
-                            <span className="brand-sub">Diagnostic & Laboratory Systems</span>
-                        </div>
+                    <Link href={prefix || "/"} className="brand-logo-wrap">
+                        <img
+                            src="/humanlogo.png"
+                            alt="Human Biomedicals"
+                            className="site-logo-img"
+                        />
                     </Link>
 
                     {/* Desktop Menu */}
@@ -127,7 +113,7 @@ export default function Navbar() {
                                 className={pathname.includes("/items") ? "active" : ""}
                                 onClick={() => setMenuOpen(false)}
                             >
-                                Products Catalog
+                                Products
                             </Link>
                         </li>
                         <li>

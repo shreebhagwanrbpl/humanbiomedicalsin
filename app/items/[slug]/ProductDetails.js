@@ -373,11 +373,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             <h1 style={{ margin: "4px 0 6px 0", fontSize: "24px", color: "#0f172a", lineHeight: "1.3" }}>
                                 {product.title}
                             </h1>
-                            {product.price && (
-                                <div style={{ fontSize: "20px", fontWeight: "800", color: "#059669", margin: "6px 0" }}>
-                                    ₹{product.price}
-                                </div>
-                            )}
+                            
                         </div>
 
                         <button
@@ -485,8 +481,8 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                                 item.label?.toLowerCase().includes("contact")
                         );
                         const rawPhone = phoneItem?.value;
-    const phoneNumber = Array.isArray(rawPhone) ? rawPhone.join(", ") : (rawPhone != null ? String(rawPhone) : "");
-                        const cleanPhoneForWa = phoneNumber ? String(phoneNumber).replace(/[^0-9]/g, "") : "";
+    const phoneNumber = "+91 9251616952";
+                        const cleanPhoneForWa = "919251616952";
 
                         if (!phoneNumber && !cleanPhoneForWa) return null;
 
@@ -494,7 +490,7 @@ export default function ProductDetails({ initialProduct, district: propDistrict,
                             <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
                                 {phoneNumber && (
                                     <a
-                                        href={`tel:${phoneNumber}`}
+                                        href="tel:+919251616952"
                                         style={{
                                             flex: 1,
                                             minWidth: "160px",
