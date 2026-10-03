@@ -1,5 +1,6 @@
 "use client";
 
+import "./Products.css";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { ChevronUp, ChevronDown, ChevronRight, Search, Eye, Layers } from "lucide-react";
 import Link from "next/link";
@@ -386,24 +387,30 @@ export default function ProductsClient({
 
                                                             {/* CONTENT */}
                                                             <div className="product-row-content">
-                                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", flexWrap: "wrap" }}>
-                                                                    <h3 style={{ margin: 0 }}>{product.title}</h3>
-                                                                    
-                                                                    {product.capacity && (
+                                                                <h3 className="product-title-text">{product.title}</h3>
+                                                                
+                                                                <div className="product-info-grid">
+                                                                    {product.capacity ? (
                                                                         <div className="info-box">
                                                                             <span>Capacity</span>
                                                                             <strong>{product.capacity}</strong>
                                                                         </div>
-                                                                    )}
-                                                                    {product.throughput && (
+                                                                    ) : null}
+                                                                    {product.throughput ? (
                                                                         <div className="info-box">
                                                                             <span>Throughput</span>
                                                                             <strong>{product.throughput}</strong>
                                                                         </div>
-                                                                    )}
+                                                                    ) : null}
+                                                                    {product.brand ? (
+                                                                        <div className="info-box">
+                                                                            <span>Brand</span>
+                                                                            <strong>{product.brand}</strong>
+                                                                        </div>
+                                                                    ) : null}
                                                                     <div className="info-box">
                                                                         <span>Category</span>
-                                                                        <strong>{product.category}</strong>
+                                                                        <strong>{product.category || sub.name || category.name}</strong>
                                                                     </div>
                                                                 </div>
                                                             </div>
